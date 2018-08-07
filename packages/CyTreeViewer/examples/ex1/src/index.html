@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>
+        #viewer {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #444448;
+        }
+
+         .node {
+             cursor: pointer;
+         }
+
+        .node:hover {
+            stroke: #aaaaaa;
+            stroke-width: 1.5px;
+        }
+
+        .node--leaf {
+            fill: white;
+        }
+
+        .label {
+            font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+            text-anchor: middle;
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+        }
+
+        .label,
+        .node--root,
+        .node--leaf {
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="viewer"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

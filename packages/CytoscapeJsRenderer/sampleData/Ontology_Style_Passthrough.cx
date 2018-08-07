@@ -1,0 +1,809 @@
+[{"numberVerification":[{"longNumber":281474976710655}]},{"metaData":[{"consistencyGroup":1,"elementCount":1,"lastUpdate":1507676722805,"name":"ndexStatus","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":1,"lastUpdate":1507676722818,"name":"provenanceHistory","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":8,"idCounter":17938,"name":"nodes","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":8,"idCounter":17939,"name":"edges","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":1,"name":"networkAttributes","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":80,"name":"nodeAttributes","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":48,"name":"edgeAttributes","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":8,"name":"cartesianLayout","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":3,"name":"cyVisualProperties","properties":[],"version":"1.0"},{"consistencyGroup":1,"elementCount":1,"name":"cyHiddenAttributes","properties":[],"version":"1.0"}]},{"ndexStatus":[{"externalId":"7e7e7b0d-ae0f-11e7-9743-0660b7976219","creationTime":1507676722805,"modificationTime":1507676722805,"visibility":"PRIVATE","published":false,"nodeCount":8,"edgeCount":8,"owner":"mikeyu_testacct","ndexServerURI":"http://dev2.ndexbio.org","readOnly":false}]}, {"provenanceHistory":[{"entity":{"uri":"http://dev2.ndexbio.org/v2/network/7e7e7b0d-ae0f-11e7-9743-0660b7976219/summary","creationEvent":{"inputs":[{"uri":null,"creationEvent":{"inputs":null,"startedAtTime":1507676724283,"endedAtTime":1507676724283,"eventType":"Cytoscape Upload","properties":[]},"properties":[]}],"startedAtTime":1507676722805,"endedAtTime":1507676722805,"eventType":"Program Upload in CX","properties":[{"name":"user","value":"Michael Yu"},{"name":"user name","value":"mikeyu_testacct"}]},"properties":[{"name":"edge count","value":"8"},{"name":"node count","value":"8"},{"name":"dc:title","value":"Ontology_Style_Passthrough"}]}}]}, {"nodes":[{
+  "@id" : 17911,
+  "n" : "T1"
+}, {
+  "@id" : 17910,
+  "n" : "T3"
+}, {
+  "@id" : 17909,
+  "n" : "T2"
+}, {
+  "@id" : 17908,
+  "n" : "T4"
+}, {
+  "@id" : 17907,
+  "n" : "G1"
+}, {
+  "@id" : 17906,
+  "n" : "G2"
+}, {
+  "@id" : 17905,
+  "n" : "G3"
+}, {
+  "@id" : 17904,
+  "n" : "G4"
+}]}, {"edges":[{
+  "@id" : 17919,
+  "s" : 17911,
+  "t" : 17908,
+  "i" : "-"
+}, {
+  "@id" : 17918,
+  "s" : 17910,
+  "t" : 17908,
+  "i" : "-"
+}, {
+  "@id" : 17917,
+  "s" : 17909,
+  "t" : 17908,
+  "i" : "-"
+}, {
+  "@id" : 17916,
+  "s" : 17907,
+  "t" : 17911,
+  "i" : "-"
+}, {
+  "@id" : 17915,
+  "s" : 17907,
+  "t" : 17909,
+  "i" : "-"
+}, {
+  "@id" : 17914,
+  "s" : 17906,
+  "t" : 17911,
+  "i" : "-"
+}, {
+  "@id" : 17913,
+  "s" : 17905,
+  "t" : 17909,
+  "i" : "-"
+}, {
+  "@id" : 17912,
+  "s" : 17904,
+  "t" : 17910,
+  "i" : "-"
+}]}, {"networkAttributes":[{
+  "n" : "name",
+  "v" : "Ontology_Style_Passthrough"
+}]}, {"nodeAttributes":[{
+  "po" : 17911,
+  "n" : "Vis:Label",
+  "v" : "T1"
+}, {
+  "po" : 17911,
+  "n" : "Vis:Fill Color",
+  "v" : "#D65F5F"
+}, {
+  "po" : 17911,
+  "n" : "isRoot",
+  "v" : "false",
+  "d" : "boolean"
+}, {
+  "po" : 17911,
+  "n" : "Size",
+  "v" : "2",
+  "d" : "integer"
+}, {
+  "po" : 17911,
+  "n" : "Vis:Border Paint",
+  "v" : "#000000"
+}, {
+  "po" : 17911,
+  "n" : "Vis:Shape",
+  "v" : "Circle"
+}, {
+  "po" : 17911,
+  "n" : "Label",
+  "v" : "T1"
+}, {
+  "po" : 17911,
+  "n" : "x_pos",
+  "v" : "390.914231084",
+  "d" : "double"
+}, {
+  "po" : 17911,
+  "n" : "NodeType",
+  "v" : "Term"
+}, {
+  "po" : 17911,
+  "n" : "y_pos",
+  "v" : "-305.715136063",
+  "d" : "double"
+}, {
+  "po" : 17910,
+  "n" : "Vis:Label",
+  "v" : "T3"
+}, {
+  "po" : 17910,
+  "n" : "Vis:Fill Color",
+  "v" : "#B47CC7"
+}, {
+  "po" : 17910,
+  "n" : "isRoot",
+  "v" : "false",
+  "d" : "boolean"
+}, {
+  "po" : 17910,
+  "n" : "Size",
+  "v" : "1",
+  "d" : "integer"
+}, {
+  "po" : 17910,
+  "n" : "Vis:Border Paint",
+  "v" : "#000000"
+}, {
+  "po" : 17910,
+  "n" : "Vis:Shape",
+  "v" : "Circle"
+}, {
+  "po" : 17910,
+  "n" : "Label",
+  "v" : "T3"
+}, {
+  "po" : 17910,
+  "n" : "x_pos",
+  "v" : "-197.937591544",
+  "d" : "double"
+}, {
+  "po" : 17910,
+  "n" : "NodeType",
+  "v" : "Term"
+}, {
+  "po" : 17910,
+  "n" : "y_pos",
+  "v" : "-3.56221355477",
+  "d" : "double"
+}, {
+  "po" : 17909,
+  "n" : "Vis:Label",
+  "v" : "T2"
+}, {
+  "po" : 17909,
+  "n" : "Vis:Fill Color",
+  "v" : "#D65F5F"
+}, {
+  "po" : 17909,
+  "n" : "isRoot",
+  "v" : "false",
+  "d" : "boolean"
+}, {
+  "po" : 17909,
+  "n" : "Size",
+  "v" : "2",
+  "d" : "integer"
+}, {
+  "po" : 17909,
+  "n" : "Vis:Border Paint",
+  "v" : "#000000"
+}, {
+  "po" : 17909,
+  "n" : "Vis:Shape",
+  "v" : "Circle"
+}, {
+  "po" : 17909,
+  "n" : "Label",
+  "v" : "T2"
+}, {
+  "po" : 17909,
+  "n" : "x_pos",
+  "v" : "385.986553202",
+  "d" : "double"
+}, {
+  "po" : 17909,
+  "n" : "NodeType",
+  "v" : "Term"
+}, {
+  "po" : 17909,
+  "n" : "y_pos",
+  "v" : "311.625021735",
+  "d" : "double"
+}, {
+  "po" : 17908,
+  "n" : "Vis:Label",
+  "v" : "T4"
+}, {
+  "po" : 17908,
+  "n" : "Vis:Fill Color",
+  "v" : "#B47CC7"
+}, {
+  "po" : 17908,
+  "n" : "isRoot",
+  "v" : "true",
+  "d" : "boolean"
+}, {
+  "po" : 17908,
+  "n" : "Size",
+  "v" : "4",
+  "d" : "integer"
+}, {
+  "po" : 17908,
+  "n" : "Vis:Border Paint",
+  "v" : "#000000"
+}, {
+  "po" : 17908,
+  "n" : "Vis:Shape",
+  "v" : "Circle"
+}, {
+  "po" : 17908,
+  "n" : "Label",
+  "v" : "T4"
+}, {
+  "po" : 17908,
+  "n" : "x_pos",
+  "v" : "192.429436326",
+  "d" : "double"
+}, {
+  "po" : 17908,
+  "n" : "NodeType",
+  "v" : "Term"
+}, {
+  "po" : 17908,
+  "n" : "y_pos",
+  "v" : "1.6470990399",
+  "d" : "double"
+}, {
+  "po" : 17907,
+  "n" : "Vis:Label",
+  "v" : "G1"
+}, {
+  "po" : 17907,
+  "n" : "Vis:Fill Color",
+  "v" : "#6ACC65"
+}, {
+  "po" : 17907,
+  "n" : "isRoot",
+  "v" : "false",
+  "d" : "boolean"
+}, {
+  "po" : 17907,
+  "n" : "Size",
+  "v" : "1",
+  "d" : "integer"
+}, {
+  "po" : 17907,
+  "n" : "Vis:Border Paint",
+  "v" : "#000000"
+}, {
+  "po" : 17907,
+  "n" : "Vis:Shape",
+  "v" : "Rectangle"
+}, {
+  "po" : 17907,
+  "n" : "Label",
+  "v" : "G1"
+}, {
+  "po" : 17907,
+  "n" : "x_pos",
+  "v" : "750.0",
+  "d" : "double"
+}, {
+  "po" : 17907,
+  "n" : "NodeType",
+  "v" : "Gene"
+}, {
+  "po" : 17907,
+  "n" : "y_pos",
+  "v" : "-630.382454393",
+  "d" : "double"
+}, {
+  "po" : 17906,
+  "n" : "Vis:Label",
+  "v" : "G2"
+}, {
+  "po" : 17906,
+  "n" : "Vis:Fill Color",
+  "v" : "#FFFFFFF"
+}, {
+  "po" : 17906,
+  "n" : "isRoot",
+  "v" : "false",
+  "d" : "boolean"
+}, {
+  "po" : 17906,
+  "n" : "Size",
+  "v" : "1",
+  "d" : "integer"
+}, {
+  "po" : 17906,
+  "n" : "Vis:Border Paint",
+  "v" : "#D65F5F"
+}, {
+  "po" : 17906,
+  "n" : "Vis:Shape",
+  "v" : "Rectangle"
+}, {
+  "po" : 17906,
+  "n" : "Label",
+  "v" : "G2"
+}, {
+  "po" : 17906,
+  "n" : "x_pos",
+  "v" : "528.393398749",
+  "d" : "double"
+}, {
+  "po" : 17906,
+  "n" : "NodeType",
+  "v" : "Gene"
+}, {
+  "po" : 17906,
+  "n" : "y_pos",
+  "v" : "-750.0",
+  "d" : "double"
+}, {
+  "po" : 17905,
+  "n" : "Vis:Label",
+  "v" : "G3"
+}, {
+  "po" : 17905,
+  "n" : "Vis:Fill Color",
+  "v" : "#FFFFFFF"
+}, {
+  "po" : 17905,
+  "n" : "isRoot",
+  "v" : "false",
+  "d" : "boolean"
+}, {
+  "po" : 17905,
+  "n" : "Size",
+  "v" : "1",
+  "d" : "integer"
+}, {
+  "po" : 17905,
+  "n" : "Vis:Border Paint",
+  "v" : "#000000"
+}, {
+  "po" : 17905,
+  "n" : "Vis:Shape",
+  "v" : "Rectangle"
+}, {
+  "po" : 17905,
+  "n" : "Label",
+  "v" : "G3"
+}, {
+  "po" : 17905,
+  "n" : "x_pos",
+  "v" : "659.717617351",
+  "d" : "double"
+}, {
+  "po" : 17905,
+  "n" : "NodeType",
+  "v" : "Gene"
+}, {
+  "po" : 17905,
+  "n" : "y_pos",
+  "v" : "750.0",
+  "d" : "double"
+}, {
+  "po" : 17904,
+  "n" : "Vis:Label",
+  "v" : "G4"
+}, {
+  "po" : 17904,
+  "n" : "Vis:Fill Color",
+  "v" : "#FFFFFFF"
+}, {
+  "po" : 17904,
+  "n" : "isRoot",
+  "v" : "false",
+  "d" : "boolean"
+}, {
+  "po" : 17904,
+  "n" : "Size",
+  "v" : "1",
+  "d" : "integer"
+}, {
+  "po" : 17904,
+  "n" : "Vis:Border Paint",
+  "v" : "#000000"
+}, {
+  "po" : 17904,
+  "n" : "Vis:Shape",
+  "v" : "Rectangle"
+}, {
+  "po" : 17904,
+  "n" : "Label",
+  "v" : "G4"
+}, {
+  "po" : 17904,
+  "n" : "x_pos",
+  "v" : "-750.0",
+  "d" : "double"
+}, {
+  "po" : 17904,
+  "n" : "NodeType",
+  "v" : "Gene"
+}, {
+  "po" : 17904,
+  "n" : "y_pos",
+  "v" : "-10.929293314",
+  "d" : "double"
+}]}, {"edgeAttributes":[{
+  "po" : 17919,
+  "n" : "name",
+  "v" : "7 (-) 4"
+}, {
+  "po" : 17919,
+  "n" : "Is_Tree_Edge",
+  "v" : "Tree"
+}, {
+  "po" : 17919,
+  "n" : "Vis:Visible",
+  "v" : "true",
+  "d" : "boolean"
+}, {
+  "po" : 17919,
+  "n" : "interaction",
+  "v" : "-"
+}, {
+  "po" : 17919,
+  "n" : "EdgeType",
+  "v" : "Child-Parent"
+}, {
+  "po" : 17919,
+  "n" : "key",
+  "v" : "7",
+  "d" : "integer"
+}, {
+  "po" : 17918,
+  "n" : "name",
+  "v" : "6 (-) 4"
+}, {
+  "po" : 17918,
+  "n" : "Is_Tree_Edge",
+  "v" : "Tree"
+}, {
+  "po" : 17918,
+  "n" : "Vis:Visible",
+  "v" : "true",
+  "d" : "boolean"
+}, {
+  "po" : 17918,
+  "n" : "interaction",
+  "v" : "-"
+}, {
+  "po" : 17918,
+  "n" : "EdgeType",
+  "v" : "Child-Parent"
+}, {
+  "po" : 17918,
+  "n" : "key",
+  "v" : "6",
+  "d" : "integer"
+}, {
+  "po" : 17917,
+  "n" : "name",
+  "v" : "5 (-) 4"
+}, {
+  "po" : 17917,
+  "n" : "Is_Tree_Edge",
+  "v" : "Tree"
+}, {
+  "po" : 17917,
+  "n" : "Vis:Visible",
+  "v" : "true",
+  "d" : "boolean"
+}, {
+  "po" : 17917,
+  "n" : "interaction",
+  "v" : "-"
+}, {
+  "po" : 17917,
+  "n" : "EdgeType",
+  "v" : "Child-Parent"
+}, {
+  "po" : 17917,
+  "n" : "key",
+  "v" : "5",
+  "d" : "integer"
+}, {
+  "po" : 17916,
+  "n" : "name",
+  "v" : "3 (-) 7"
+}, {
+  "po" : 17916,
+  "n" : "Is_Tree_Edge",
+  "v" : "Tree"
+}, {
+  "po" : 17916,
+  "n" : "Vis:Visible",
+  "v" : "true",
+  "d" : "boolean"
+}, {
+  "po" : 17916,
+  "n" : "interaction",
+  "v" : "-"
+}, {
+  "po" : 17916,
+  "n" : "EdgeType",
+  "v" : "Gene-Term"
+}, {
+  "po" : 17916,
+  "n" : "key",
+  "v" : "4",
+  "d" : "integer"
+}, {
+  "po" : 17915,
+  "n" : "name",
+  "v" : "3 (-) 5"
+}, {
+  "po" : 17915,
+  "n" : "Is_Tree_Edge",
+  "v" : "Not_Tree"
+}, {
+  "po" : 17915,
+  "n" : "Vis:Visible",
+  "v" : "false",
+  "d" : "boolean"
+}, {
+  "po" : 17915,
+  "n" : "interaction",
+  "v" : "-"
+}, {
+  "po" : 17915,
+  "n" : "EdgeType",
+  "v" : "Gene-Term"
+}, {
+  "po" : 17915,
+  "n" : "key",
+  "v" : "3",
+  "d" : "integer"
+}, {
+  "po" : 17914,
+  "n" : "name",
+  "v" : "2 (-) 7"
+}, {
+  "po" : 17914,
+  "n" : "Is_Tree_Edge",
+  "v" : "Tree"
+}, {
+  "po" : 17914,
+  "n" : "Vis:Visible",
+  "v" : "true",
+  "d" : "boolean"
+}, {
+  "po" : 17914,
+  "n" : "interaction",
+  "v" : "-"
+}, {
+  "po" : 17914,
+  "n" : "EdgeType",
+  "v" : "Gene-Term"
+}, {
+  "po" : 17914,
+  "n" : "key",
+  "v" : "2",
+  "d" : "integer"
+}, {
+  "po" : 17913,
+  "n" : "name",
+  "v" : "1 (-) 5"
+}, {
+  "po" : 17913,
+  "n" : "Is_Tree_Edge",
+  "v" : "Tree"
+}, {
+  "po" : 17913,
+  "n" : "Vis:Visible",
+  "v" : "true",
+  "d" : "boolean"
+}, {
+  "po" : 17913,
+  "n" : "interaction",
+  "v" : "-"
+}, {
+  "po" : 17913,
+  "n" : "EdgeType",
+  "v" : "Gene-Term"
+}, {
+  "po" : 17913,
+  "n" : "key",
+  "v" : "1",
+  "d" : "integer"
+}, {
+  "po" : 17912,
+  "n" : "name",
+  "v" : "0 (-) 6"
+}, {
+  "po" : 17912,
+  "n" : "Is_Tree_Edge",
+  "v" : "Tree"
+}, {
+  "po" : 17912,
+  "n" : "Vis:Visible",
+  "v" : "true",
+  "d" : "boolean"
+}, {
+  "po" : 17912,
+  "n" : "interaction",
+  "v" : "-"
+}, {
+  "po" : 17912,
+  "n" : "EdgeType",
+  "v" : "Gene-Term"
+}, {
+  "po" : 17912,
+  "n" : "key",
+  "v" : "0",
+  "d" : "integer"
+}]}, {"cartesianLayout":[{
+  "node" : 17911,
+  "x" : 390.914231084,
+  "y" : -305.715136063
+}, {
+  "node" : 17910,
+  "x" : -197.937591544,
+  "y" : -3.56221355477
+}, {
+  "node" : 17909,
+  "x" : 385.986553202,
+  "y" : 311.625021735
+}, {
+  "node" : 17908,
+  "x" : 192.429436326,
+  "y" : 1.6470990399
+}, {
+  "node" : 17907,
+  "x" : 750.0,
+  "y" : -630.382454393
+}, {
+  "node" : 17906,
+  "x" : 528.393398749,
+  "y" : -750.0
+}, {
+  "node" : 17905,
+  "x" : 659.717617351,
+  "y" : 750.0
+}, {
+  "node" : 17904,
+  "x" : -750.0,
+  "y" : -10.929293314
+}]}, {"cyVisualProperties":[{
+  "properties_of" : "network",
+  "properties" : {
+    "NETWORK_BACKGROUND_PAINT" : "#FFFFFF",
+    "NETWORK_CENTER_X_LOCATION" : "0.0",
+    "NETWORK_CENTER_Y_LOCATION" : "0.0",
+    "NETWORK_CENTER_Z_LOCATION" : "0.0",
+    "NETWORK_DEPTH" : "0.0",
+    "NETWORK_EDGE_SELECTION" : "true",
+    "NETWORK_HEIGHT" : "400.0",
+    "NETWORK_NODE_SELECTION" : "true",
+    "NETWORK_SCALE_FACTOR" : "1.0",
+    "NETWORK_WIDTH" : "550.0"
+  }
+}, {
+  "properties_of" : "nodes:default",
+  "properties" : {
+    "COMPOUND_NODE_PADDING" : "10.0",
+    "COMPOUND_NODE_SHAPE" : "ROUND_RECTANGLE",
+    "NODE_BORDER_PAINT" : "#000000",
+    "NODE_BORDER_STROKE" : "SOLID",
+    "NODE_BORDER_TRANSPARENCY" : "255",
+    "NODE_BORDER_WIDTH" : "2.0",
+    "NODE_CUSTOMGRAPHICS_1" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_2" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_3" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_4" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_5" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_6" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_7" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_8" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_9" : "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+    "NODE_CUSTOMGRAPHICS_POSITION_1" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_POSITION_2" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_POSITION_3" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_POSITION_4" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_POSITION_5" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_POSITION_6" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_POSITION_7" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_POSITION_8" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_POSITION_9" : "C,C,c,0.00,0.00",
+    "NODE_CUSTOMGRAPHICS_SIZE_1" : "0.0",
+    "NODE_CUSTOMGRAPHICS_SIZE_2" : "0.0",
+    "NODE_CUSTOMGRAPHICS_SIZE_3" : "0.0",
+    "NODE_CUSTOMGRAPHICS_SIZE_4" : "0.0",
+    "NODE_CUSTOMGRAPHICS_SIZE_5" : "0.0",
+    "NODE_CUSTOMGRAPHICS_SIZE_6" : "0.0",
+    "NODE_CUSTOMGRAPHICS_SIZE_7" : "0.0",
+    "NODE_CUSTOMGRAPHICS_SIZE_8" : "0.0",
+    "NODE_CUSTOMGRAPHICS_SIZE_9" : "0.0",
+    "NODE_CUSTOMPAINT_1" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_1, name=Node Custom Paint 1)",
+    "NODE_CUSTOMPAINT_2" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_2, name=Node Custom Paint 2)",
+    "NODE_CUSTOMPAINT_3" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_3, name=Node Custom Paint 3)",
+    "NODE_CUSTOMPAINT_4" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_4, name=Node Custom Paint 4)",
+    "NODE_CUSTOMPAINT_5" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_5, name=Node Custom Paint 5)",
+    "NODE_CUSTOMPAINT_6" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_6, name=Node Custom Paint 6)",
+    "NODE_CUSTOMPAINT_7" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_7, name=Node Custom Paint 7)",
+    "NODE_CUSTOMPAINT_8" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_8, name=Node Custom Paint 8)",
+    "NODE_CUSTOMPAINT_9" : "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_9, name=Node Custom Paint 9)",
+    "NODE_DEPTH" : "0.0",
+    "NODE_FILL_COLOR" : "#FFFFFF",
+    "NODE_HEIGHT" : "40.0",
+    "NODE_LABEL_COLOR" : "#000000",
+    "NODE_LABEL_FONT_FACE" : "SansSerif.plain,plain,12",
+    "NODE_LABEL_FONT_SIZE" : "12",
+    "NODE_LABEL_POSITION" : "N,S,c,0.00,0.00",
+    "NODE_LABEL_TRANSPARENCY" : "255",
+    "NODE_LABEL_WIDTH" : "200.0",
+    "NODE_NESTED_NETWORK_IMAGE_VISIBLE" : "true",
+    "NODE_PAINT" : "#787878",
+    "NODE_SELECTED" : "false",
+    "NODE_SELECTED_PAINT" : "#FFFF00",
+    "NODE_SHAPE" : "ELLIPSE",
+    "NODE_TRANSPARENCY" : "255",
+    "NODE_VISIBLE" : "true",
+    "NODE_WIDTH" : "60.0",
+    "NODE_X_LOCATION" : "0.0",
+    "NODE_Y_LOCATION" : "0.0",
+    "NODE_Z_LOCATION" : "0.0"
+  },
+  "dependencies" : {
+    "nodeCustomGraphicsSizeSync" : "true",
+    "nodeSizeLocked" : "true"
+  },
+  "mappings" : {
+    "NODE_BORDER_PAINT" : {
+      "type" : "PASSTHROUGH",
+      "definition" : "COL=Vis:Border Paint,T=string"
+    },
+    "NODE_FILL_COLOR" : {
+      "type" : "PASSTHROUGH",
+      "definition" : "COL=Vis:Fill Color,T=string"
+    },
+    "NODE_LABEL" : {
+      "type" : "PASSTHROUGH",
+      "definition" : "COL=Label,T=string"
+    },
+    "NODE_SHAPE" : {
+      "type" : "PASSTHROUGH",
+      "definition" : "COL=Vis:Shape,T=string"
+    },
+    "NODE_SIZE" : {
+      "type" : "PASSTHROUGH",
+      "definition" : "COL=Vis:Size,T=string"
+    },
+    "NODE_X_LOCATION" : {
+      "type" : "PASSTHROUGH",
+      "definition" : "COL=x_pos,T=double"
+    },
+    "NODE_Y_LOCATION" : {
+      "type" : "PASSTHROUGH",
+      "definition" : "COL=y_pos,T=double"
+    }
+  }
+}, {
+  "properties_of" : "edges:default",
+  "properties" : {
+    "EDGE_CURVED" : "true",
+    "EDGE_LABEL_COLOR" : "#000000",
+    "EDGE_LABEL_FONT_FACE" : "SansSerif.plain,plain,10",
+    "EDGE_LABEL_FONT_SIZE" : "10",
+    "EDGE_LABEL_TRANSPARENCY" : "255",
+    "EDGE_LABEL_WIDTH" : "200.0",
+    "EDGE_LINE_TYPE" : "SOLID",
+    "EDGE_SELECTED" : "false",
+    "EDGE_SOURCE_ARROW_SELECTED_PAINT" : "#FFFF00",
+    "EDGE_SOURCE_ARROW_SHAPE" : "NONE",
+    "EDGE_SOURCE_ARROW_UNSELECTED_PAINT" : "#000000",
+    "EDGE_STROKE_SELECTED_PAINT" : "#FF0000",
+    "EDGE_STROKE_UNSELECTED_PAINT" : "#404040",
+    "EDGE_TARGET_ARROW_SELECTED_PAINT" : "#FFFF00",
+    "EDGE_TARGET_ARROW_SHAPE" : "ARROW",
+    "EDGE_TARGET_ARROW_UNSELECTED_PAINT" : "#000000",
+    "EDGE_TRANSPARENCY" : "255",
+    "EDGE_VISIBLE" : "true",
+    "EDGE_WIDTH" : "1.0"
+  },
+  "dependencies" : {
+    "arrowColorMatchesEdge" : "false"
+  },
+  "mappings" : {
+    "EDGE_VISIBLE" : {
+      "type" : "PASSTHROUGH",
+      "definition" : "COL=Vis:Visible,T=boolean"
+    }
+  }
+}]}, {"cyHiddenAttributes":[{
+  "n" : "layoutAlgorithm",
+  "v" : "Prefuse Force Directed Layout"
+}]},{"status":[{"error":"","success":true}]}]

@@ -1,0 +1,82 @@
+{
+  "name": "cy-tree-viewer",
+  "author": "Keiichiro Ono <kono@ucsd.edu>",
+  "version": "v0.2.0",
+  "description": "React component for tree data visualization",
+  "license": "MIT",
+  "keywords": [
+    "cytoscape",
+    "visualization",
+    "graph",
+    "bioinformatics"
+  ],
+  "main": "build/CyTreeViewer.js",
+  "files": [
+    "webpack.config.babel.js",
+    ".preprocessor.js",
+    ".travis.yml",
+    ".babelrc",
+    "build/*",
+    "src/*"
+  ],
+  "scripts": {
+    "build": "./node_modules/.bin/webpack --progress --colors",
+    "clean": "rm build/*",
+    "lint": "eslint src/ --fix; exit 0",
+    "test": "./node_modules/.bin/jest",
+    "coverage": "jest --coverage"
+  },
+  "homepage": "https://github.com/CyComponent/CyTreeViewer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CyComponent/CyTreeViewer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CyComponent/CyTreeViewer/issues"
+  },
+  "dependencies": {
+    "d3-array": "^1.2.1",
+    "d3-color": "^1.2.0",
+    "d3-hierarchy": "^1.1.6",
+    "d3-interpolate": "^1.2.0",
+    "d3-scale": "^1.0.7",
+    "d3-selection": "^1.3.0",
+    "d3-shape": "^1.2.0",
+    "d3-transition": "^1.1.1",
+    "d3-zoom": "^1.7.1"
+  },
+  "peerDependencies": {
+    "immutable": "^3.8.2",
+    "prop-types": "^15.6.1",
+    "react": "^16.3.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.3",
+    "babel-jest": "^22.4.3",
+    "babel-loader": "^7.1.4",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-react": "^7.8.2",
+    "immutable": "^3.8.2",
+    "jest": "^21.2.1",
+    "jest-webpack-alias": "^3.3.3",
+    "prettier": "^1.12.1",
+    "prop-types": "^15.6.1",
+    "react": "^16.3.2",
+    "regenerator-runtime": "^0.11.1",
+    "webpack": "^4.8.3",
+    "webpack-cli": "^2.1.3"
+  },
+  "jest": {
+    "transform": {
+      ".*": "<rootDir>/.preprocessor.js"
+    }
+  }
+}

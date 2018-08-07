@@ -1,0 +1,78 @@
+{
+  "name": "cytoscapejs-renderer",
+  "author": "Keiichiro Ono <kono@ucsd.edu>",
+  "version": "v0.1.0",
+  "description": "Network renderer components for CyNetworkViewer. Current version includes Cytoscape.js renderer and Sigma.js renderer.",
+  "license": "MIT",
+  "keywords": [
+    "cytoscape",
+    "visualization",
+    "graph",
+    "bioinformatics"
+  ],
+  "main": "build/CytoscapeJsRenderer.js",
+  "files": [
+    "webpack.config.babel.js",
+    ".preprocessor.js",
+    ".travis.yml",
+    ".babelrc",
+    "build/*",
+    "src/*"
+  ],
+  "scripts": {
+    "build": "./node_modules/.bin/webpack --mode development --progress --colors",
+    "clean": "rm build/*",
+    "lint": "eslint src/; exit 0",
+    "test": "eslint src/ && jest",
+    "coverage": "jest --coverage"
+  },
+  "homepage": "https://github.com/CyComponent/CytoscapeJsRenderer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CyComponent/CytoscapeJsRenderer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CyComponent/CytoscapeJsRenderer/issues"
+  },
+  "dependencies": {
+    "cytoscape": "^3.2.13",
+    "cytoscape-cose-bilkent": "^4.0.0",
+    "sigma": "^1.2.1"
+  },
+  "peerDependencies": {
+    "immutable": "^3.8.2",
+    "react": "^16.3.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.3",
+    "babel-jest": "^22.4.3",
+    "babel-loader": "^7.1.4",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "eslint": "^4.19.1",
+    "immutable": "^3.8.2",
+    "jest": "^22.4.3",
+    "prettier": "^1.12.1",
+    "react": "^16.3.2",
+    "webpack": "^4.8.2",
+    "webpack-cli": "^2.1.3"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/.preprocessor.js"
+  },
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "extends": "eslint:recommended",
+    "ecmaFeatures": {
+      "jsx": true,
+      "modules": true
+    },
+    "env": {
+      "es6": true,
+      "browser": true
+    }
+  }
+}

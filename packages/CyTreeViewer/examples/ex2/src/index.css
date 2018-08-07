@@ -1,0 +1,56 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background-color: #EFEFEF;
+}
+
+.circle-packing {
+  background-color: #EFEFEF !important;
+}
+
+.node {
+  cursor: pointer;
+}
+
+.label {
+  font: 12px "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-anchor: middle;
+}
+
+.label,
+.node--root {
+  pointer-events: none;
+}
+
+.node:hover {
+  stroke: orange;
+  opacity: 1;
+  stroke-width: 4px;
+}
+
+#tooltip {
+  position: absolute;
+  width: 200px;
+  height: auto;
+  padding: 10px;
+  background-color: red;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+#tooltip.hidden {
+  display: none;
+}
+
+#tooltip p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+}
+
