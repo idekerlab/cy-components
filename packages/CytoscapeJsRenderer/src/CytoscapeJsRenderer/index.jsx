@@ -44,7 +44,7 @@ class CytoscapeJsRenderer extends Component {
       cy = cyjs
     }
 
-    this.setState({networkData: network.data})
+    this.setState({ networkData: network.data })
 
     cy.startBatch()
 
@@ -114,14 +114,10 @@ class CytoscapeJsRenderer extends Component {
     return false
   }
 
-
   select(selected) {
-
-
     // Turn off event handlers for performance
     const cy = this.state.cyjs
     cy.off(config.SUPPORTED_EVENTS)
-
 
     try {
       cy.startBatch()
@@ -129,10 +125,12 @@ class CytoscapeJsRenderer extends Component {
       cy.endBatch()
 
       const idList = selected.nodes
-      if(!idList) {
+      if (!idList) {
         return
       }
 
+      const elements = cy.elements()
+      elements.unselect()
 
       const idListPermanent = [...selected.nodesPerm]
 
@@ -141,20 +139,21 @@ class CytoscapeJsRenderer extends Component {
         cy.startBatch()
         const permSelected = idListPermanent.map(id => '#' + id)
         const permSelectedStr = permSelected.toString()
-        cy.elements(permSelectedStr).style({
+        const permanentNodes = cy.elements(permSelectedStr)
+
+        permanentNodes.style({
           'background-color': 'green'
         })
+        permanentNodes.select()
+
         cy.endBatch()
       }
 
-      const elements = cy.elements()
 
       cy.startBatch()
       if (!idList || idList.length === 0) {
         elements.removeClass('hidden')
         elements.removeClass('seed')
-        elements.unselect()
-        cy.fit()
       } else {
         const selected2 = idList.map(id => '#' + id)
         const strVal = selected2.toString()
@@ -168,25 +167,15 @@ class CytoscapeJsRenderer extends Component {
           const edgeDiff = connectingEdges.diff(toBeRemoved)
           const internalEdges = edgeDiff.left
 
-
           if (internalEdges) {
             elements.addClass('hidden')
             targets.removeClass('hidden').select()
             internalEdges.removeClass('hidden').select()
-
-            cy.animate({
-              fit: {
-                eles: targets
-              }
-            }, {
-              duration: 500
-            });
           }
         }
       }
       cy.endBatch()
-
-    }catch(ex) {
+    } catch (ex) {
       console.warn('WNG')
     }
     cy.on(config.SUPPORTED_EVENTS, this.cyEventHandler)
@@ -212,7 +201,7 @@ class CytoscapeJsRenderer extends Component {
       return
     }
 
-    if(nextProps.selected !== this.props.selected) {
+    if (nextProps.selected !== this.props.selected) {
       this.select(nextProps.selected)
     }
 
@@ -227,7 +216,6 @@ class CytoscapeJsRenderer extends Component {
     const currentVs = this.props.networkStyle
 
     if (!newVs) {
-
       console.log(newVs, currentVs)
 
       if (currentVs === null || currentVs === undefined) {
@@ -278,6 +266,15 @@ class CytoscapeJsRenderer extends Component {
 
     if (commandName === 'fit') {
       cy.fit()
+    } else if (commandName === 'fitSelected') {
+      const selectedNodes = cy.nodes(':selected')
+      cy.animate({
+        fit: {
+          eles: selectedNodes
+        },
+        duration: 800
+      })
+
     } else if (commandName === 'zoomIn') {
       cy.zoom(cy.zoom() * 1.2)
     } else if (commandName === 'zoomOut') {
@@ -306,7 +303,6 @@ class CytoscapeJsRenderer extends Component {
           }
         })
     } else if (commandName === 'select') {
-
       // Clear
       cy.startBatch()
 
@@ -321,7 +317,6 @@ class CytoscapeJsRenderer extends Component {
 
       const strVal = selected.toString()
       const target = cy.elements(strVal)
-
 
       target.select()
       if (commandParams.selectedColor !== undefined) {
@@ -387,15 +382,12 @@ class CytoscapeJsRenderer extends Component {
       target.unselect()
       target.removeStyle()
       cy.endBatch()
-
     } else if (commandName === 'unselectAll') {
-
       cy.startBatch()
       const target = cy.nodes()
       target.unselect()
       target.removeStyle()
       cy.endBatch()
-
     } else if (commandName === 'focus') {
       const idList = commandParams.idList
       let selected = idList.map(id => id.replace(/\:/, '\\:'))
@@ -417,7 +409,6 @@ class CytoscapeJsRenderer extends Component {
       const targetType = options.targetType
 
       if (filterType === 'numeric') {
-
         cy.startBatch()
 
         if (isPrimary) {
@@ -474,7 +465,10 @@ class CytoscapeJsRenderer extends Component {
       if (edgeType !== undefined) {
         cy.startBatch()
 
-        const mainEdgeType = this.state.networkData['Main Feature'].replace(/ /g, '_')
+        const mainEdgeType = this.state.networkData['Main Feature'].replace(
+          / /g,
+          '_'
+        )
         const newEdges = this.expandEdges(edgeType, cy.edges(), mainEdgeType)
         if (newEdges.length !== 0) {
           const added = cy.add(newEdges)
@@ -515,7 +509,7 @@ class CytoscapeJsRenderer extends Component {
   /*
     Using data type to add more edges to the primary one
    */
-  expandEdges = (edgeType, edges, primaryEdgeType='RF_score') => {
+  expandEdges = (edgeType, edges, primaryEdgeType = 'RF_score') => {
     let i = edges.length
     const newEdges = []
 

@@ -287,6 +287,13 @@ const addCircles = (container, data) => {
         return 'rgba(255, 255, 255, 0.8)'
       }
     })
+    .on('click', (d, i, nodes) => {
+      if (d === undefined) {
+        return
+      }
+
+      console.log('* Circle clicked: ', d, i)
+    })
     .on('dblclick', (d, i, nodes) => {
       if (d === undefined) {
         return
