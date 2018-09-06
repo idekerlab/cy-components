@@ -187,12 +187,13 @@ class CytoscapeJsRenderer extends Component {
    */
   componentWillReceiveProps(nextProps) {
     if (this.props.style !== nextProps.style) {
-      this.state.cyjs
-        .container()
-        .setAttribute('style', 'width: ' + nextProps.style.width)
-      this.state.cyjs
-        .container()
-        .setAttribute('style', 'height: ' + nextProps.style.height)
+
+      const container = this.state.cyjs.container()
+
+      container.setAttribute('style', 'width: ' + nextProps.style.width)
+      container.setAttribute('style', 'height: ' + nextProps.style.height)
+
+      console.log('Resize called: ', nextProps.style, container)
       this.state.cyjs.resize()
     }
 
