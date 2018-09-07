@@ -149,7 +149,6 @@ class CytoscapeJsRenderer extends Component {
         cy.endBatch()
       }
 
-
       cy.startBatch()
       if (!idList || idList.length === 0) {
         elements.removeClass('hidden')
@@ -187,13 +186,6 @@ class CytoscapeJsRenderer extends Component {
    */
   componentWillReceiveProps(nextProps) {
     if (this.props.style !== nextProps.style) {
-
-      const container = this.state.cyjs.container()
-
-      container.setAttribute('style', 'width: ' + nextProps.style.width)
-      container.setAttribute('style', 'height: ' + nextProps.style.height)
-
-      console.log('Resize called: ', nextProps.style, container)
       this.state.cyjs.resize()
     }
 
@@ -275,7 +267,6 @@ class CytoscapeJsRenderer extends Component {
         },
         duration: 800
       })
-
     } else if (commandName === 'zoomIn') {
       cy.zoom(cy.zoom() * 1.2)
     } else if (commandName === 'zoomOut') {
