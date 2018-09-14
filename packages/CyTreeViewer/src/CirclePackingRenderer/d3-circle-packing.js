@@ -286,17 +286,22 @@ const addCircles = (container, data) => {
         return
       }
 
+      hideTooltip(tooltip)
       console.log('* Circle clicked: ', d, i)
     })
     .on('dblclick', (d, i, nodes) => {
       if (d === undefined) {
         return
       }
-
+      hideTooltip(tooltip)
       expand(d, i, nodes)
     })
-    .on('mouseover', (d, i, nodes) => handleMouseOver(d, i, nodes, props))
+    .on('mouseover', (d, i, nodes) => {
+      showTooltip(tooltip, d)
+      handleMouseOver(d, i, nodes, props)
+    })
     .on('mouseout', (d, i, nodes) => {
+      hideTooltip(tooltip)
       props.eventHandlers.hoverOutNode(d.data.id, d.data.data.props)
     })
     .on('contextmenu', (d, i, nodes) => {
@@ -437,17 +442,33 @@ const handleMouseOver = (d, i, nodes, props) => {
   props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent)
 }
 
-const showTooltip = div => {
+const showTooltip = (div, node) => {
+  // console.log('TP active:', node)
+  const label = node.data.data.Label
+  let parentNode = node.parent
+
+  let parent = 'N/A'
+  if (parentNode) {
+    parent = parentNode.data.data.Label
+  }
+
   div
-    .transition()
-    .duration(200)
     .style('opacity', 0.9)
   div
-    .html(formatTime(d.date) + '<br/>' + d.close)
-    .style('left', d3.event.pageX + 'px')
-    .style('top', d3.event.pageY - 28 + 'px')
+    .html(
+      '<div style="font-size: 1.3em; padding-bottom: 0.5em; line-height: 1.1em; color: #222222">' +
+        label +
+        '</div><div>Parent Subsystem: ' +
+        parent +
+        '</div>'
+    )
+    .style('left', d3Selection.event.pageX + 30 + 'px')
+    .style('top', d3Selection.event.pageY - 30 + 'px')
 }
 
+const hideTooltip = div => {
+  div.style('opacity', 0)
+}
 
 let selectedGroups = null
 
