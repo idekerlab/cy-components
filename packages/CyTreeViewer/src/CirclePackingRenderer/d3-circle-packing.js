@@ -5,6 +5,7 @@ import * as d3Zoom from 'd3-zoom'
 
 import getColorMap from './colormap-generator'
 import getSvg from './svg-container-factory'
+import getTooltip from './tooltip-factory'
 import getRoot from './hierarchy-factory'
 
 let colorMapper = null
@@ -17,9 +18,7 @@ let currentDepth = 0
 
 let height = 0
 let width = 0
-
 let g
-
 let treeHeight = 0
 
 let props
@@ -49,8 +48,8 @@ let sizeTh = 0
 const labelSizeMap = new Map()
 
 let svg = null
+let tooltip = null
 let zoom2 = null
-
 
 const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   props = originalProps
@@ -60,6 +59,7 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
     props.rendererOptions.leafColor
   )
 
+  tooltip = getTooltip()
   svg = getSvg(svgTree, width1, height1)
 
   width = width1
@@ -155,9 +155,9 @@ const getFontSize = d => {
 
   let size = 10
   if (textLen <= 5) {
-    size = d.r * 2 / textLen
+    size = (d.r * 2) / textLen
   } else {
-    size = d.r * 3 / textLen
+    size = (d.r * 3) / textLen
   }
 
   return size
@@ -210,11 +210,12 @@ const getLabelColor = d => {
   // This is a hidden node.
   if (data.props.Hidden === true) {
     return '#222222'
+  } else if (d.depth > 3) {
+    return '#393939'
   } else {
     return '#FFFFFF'
   }
 }
-
 
 const expand = (d, i, nodes) => {
   if (selectedCircle !== undefined) {
@@ -227,11 +228,9 @@ const expand = (d, i, nodes) => {
   })
   subSelected.clear()
 
-
   // Change border
   selectedCircle = d3Selection.select(nodes[i])
   selectedCircle.classed('node-selected', true)
-
 
   if (focus !== d || !focus.parent) {
     zoom(d)
@@ -247,14 +246,9 @@ const addCircles = (container, data) => {
     .append('circle')
     .attr('id', d => 'c' + d.data.id)
     .attr('class', function(d) {
-      return d.parent
-        ? d.children
-          ? 'node'
-          : 'node node--leaf'
-        : 'node'
+      return d.parent ? (d.children ? 'node' : 'node node--leaf') : 'node'
     })
     .style('display', function(d) {
-
       if (d.parent === focus) {
         currentSet.add(d)
       }
@@ -272,8 +266,8 @@ const addCircles = (container, data) => {
       if (data.props.Hidden === true) {
         if (data.NodeType !== 'Gene') {
           return 'orange'
-        // } else {
-        //   return '#238b45'
+          // } else {
+          //   return '#238b45'
         }
       }
 
@@ -335,7 +329,6 @@ const addCircles = (container, data) => {
           // Call action to select nodes in the view
 
           // props.eventHandlers.selectNode(d.data.id, d.data.data.props, false)
-
         }
 
         props.eventHandlers.selectNodes(d.data.id, d.data.data.props)
@@ -415,7 +408,10 @@ const zoom = d => {
       return 'inline'
     }
 
-    if (d.parent === focus || (currentDepth >= d.depth && d.height >= 1 && d.depth <=1)) {
+    if (
+      d.parent === focus ||
+      (currentDepth >= d.depth && d.height >= 1 && d.depth <= 1)
+    ) {
       return 'inline'
     } else {
       return 'none'
@@ -441,6 +437,17 @@ const handleMouseOver = (d, i, nodes, props) => {
   props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent)
 }
 
+const showTooltip = div => {
+  div
+    .transition()
+    .duration(200)
+    .style('opacity', 0.9)
+  div
+    .html(formatTime(d.date) + '<br/>' + d.close)
+    .style('left', d3.event.pageX + 'px')
+    .style('top', d3.event.pageY - 28 + 'px')
+}
+
 
 let selectedGroups = null
 
@@ -460,13 +467,10 @@ export const selectNodes = (selected, fillColor = 'red') => {
   selectedGroups.style('fill', fillColor).style('display', 'inline')
 }
 
-
 export const fit = () => {
   currentDepth = MAX_DEPTH
 
-  const trans = d3Zoom.zoomIdentity
-    .translate(width / 2, height / 2)
-    .scale(1)
+  const trans = d3Zoom.zoomIdentity.translate(width / 2, height / 2).scale(1)
 
   svg.call(zoom2.transform, trans)
 
@@ -474,7 +478,7 @@ export const fit = () => {
 }
 
 export const clear = () => {
-  if(selectedGroups === null) {
+  if (selectedGroups === null) {
     return
   }
 

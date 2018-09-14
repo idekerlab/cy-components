@@ -241,7 +241,11 @@ class CytoscapeJsRenderer extends Component {
       return
     }
 
-    this.updateCyjs(nextProps.network)
+    try {
+      this.updateCyjs(nextProps.network)
+    } catch(e) {
+      console.warn('Error in Cyjs renderer:', e)
+    }
   }
 
   runCommand = command => {
