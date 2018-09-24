@@ -56,10 +56,10 @@ class CytoscapeJsRenderer extends Component {
     cy.endBatch()
 
     // Apply optional filter if available
-    const command = this.props.rendererOptions.defaultFilter
-    if (command !== undefined && this.state.rendered === false) {
-      this.runCommand(command)
-    }
+    // const command = this.props.rendererOptions.defaultFilter
+    // if (command !== undefined && this.state.rendered === false) {
+    //   this.runCommand(command)
+    // }
 
     // Name of layout algorithm
     const layout = this.props.rendererOptions.layout
@@ -408,6 +408,7 @@ class CytoscapeJsRenderer extends Component {
         cy.startBatch()
 
         if (isPrimary) {
+          console.log('------------ CyJS Filter called ----------', options)
           // Before filtering, restore all original edges
           const hiddenEdges = this.state.hiddenEdges
           if (hiddenEdges !== undefined) {
