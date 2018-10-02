@@ -400,7 +400,6 @@ const zoom = d => {
     // Set current depth for later use
     currentDepth = focus.depth
 
-    // Case 1: Genes or Hidden
     if (d === focus) {
       return 'inline'
     }
@@ -408,7 +407,6 @@ const zoom = d => {
     if (
       focus.parent === d ||
       (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
-      // (d.parent === lastFocus && d.depth === lastFocus.depth)
     ) {
       return 'inline'
     }
