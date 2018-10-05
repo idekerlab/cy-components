@@ -523,6 +523,7 @@ class CytoscapeJsRenderer extends Component {
             source: edge.data('source'),
             target: edge.data('target'),
             interaction: edgeType,
+            zIndex: 0,
             [primaryEdgeType]: edge.data(primaryEdgeType),
             [edgeType]: edge.data(edgeType)
           }
