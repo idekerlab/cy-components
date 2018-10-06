@@ -346,6 +346,30 @@ const selectCurrentNodes = (nodes, type) => {
   return d3Selection.selectAll(nodeIds)
 }
 
+const shouldDisplay = (d) => {
+  currentDepth = focus.depth
+
+  const nodeType = d.data.data.NodeType
+  const dataDepth = d.depth
+
+  if (d === focus || focus === d.parent) {
+    return 'inline'
+  }
+
+  if(dataDepth <= 1 && nodeType !== 'Gene') {
+    return 'inline'
+  }
+
+  // if(currentDepth > dataDepth) {
+  //   if(nodeType !== 'Gene' && dataDepth < 3) {
+  //     return 'inline'
+  //   }
+  // }
+
+  return 'none'
+
+}
+
 const zoom = d => {
   // Update current focus
   focus = d
@@ -353,42 +377,46 @@ const zoom = d => {
   labels
     .attr('y', d => getFontSize(d) / 2)
     .style('display', d => {
+
+      const nodeType = d.data.data.NodeType
+
       // Avoid showing
-      if (d === focus && d.height !== 0) {
-        return 'none'
-      }
+      // if (d === focus && d.height !== 0) {
+      //   return 'none'
+      // }
 
-      if (d === focus || d.parent === focus.parent) {
+      // if (d === focus) {
+      //   return 'inline'
+      // }
+
+      if(focus === d.parent) {
         return 'inline'
       }
 
-      // Gene
-      if (d.data.NodeType === 'Gene') {
-        return 'inline'
-      }
+      return 'none'
 
-      if (focus.children !== undefined && focus.children.length < 100) {
-        if (
-          d.parent === focus ||
-          (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
-        ) {
-          return 'inline'
-        } else {
-          return 'none'
-        }
-      } else {
-        const size = labelSizeMap.get(d.data.id)
-        if (
-          size > sizeTh &&
-          (d.parent === focus ||
-            (focus.parent === d.parent &&
-              d.parent.depth === focus.parent.depth))
-        ) {
-          return 'inline'
-        } else {
-          return 'none'
-        }
-      }
+      // if (focus.children !== undefined && focus.children.length < 100) {
+      //   if (
+      //     d.parent === focus ||
+      //     (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
+      //   ) {
+      //     return 'inline'
+      //   } else {
+      //     return 'none'
+      //   }
+      // } else {
+      //   const size = labelSizeMap.get(d.data.id)
+      //   if (
+      //     size > sizeTh &&
+      //     (d.parent === focus ||
+      //       (focus.parent === d.parent &&
+      //         d.parent.depth === focus.parent.depth))
+      //   ) {
+      //     return 'inline'
+      //   } else {
+      //     return 'none'
+      //   }
+      // }
 
       // if (d.parent !== focus) {
       //   return 'none'
@@ -397,28 +425,24 @@ const zoom = d => {
     .style('font-size', d => getFontSize(d))
 
   circleNodes.style('display', d => {
-    // Set current depth for later use
-    currentDepth = focus.depth
+    return shouldDisplay(d)
 
-    if (d === focus) {
-      return 'inline'
-    }
 
-    if (
-      focus.parent === d ||
-      (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
-    ) {
-      return 'inline'
-    }
-
-    if (
-      d.parent === focus ||
-      (currentDepth >= d.depth && d.height >= 1 && d.depth <= 1)
-    ) {
-      return 'inline'
-    } else {
-      return 'none'
-    }
+    // if (
+    //   focus.parent === d ||
+    //   (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
+    // ) {
+    //   return 'inline'
+    // }
+    //
+    // if (
+    //   d.parent === focus ||
+    //   (currentDepth >= d.depth && d.height >= 1 && d.depth <= 1)
+    // ) {
+    //   return 'inline'
+    // } else {
+    //   return 'none'
+    // }
   })
 
   props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
