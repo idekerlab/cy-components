@@ -352,7 +352,9 @@ const shouldDisplay = (d) => {
   const nodeType = d.data.data.NodeType
   const dataDepth = d.depth
 
-  if (d === focus || focus === d.parent) {
+  // console.log('d and focus parent', d, focus.parent)
+  if (d === focus || focus === d.parent
+    || focus.parent === d.parent || d === focus.parent) {
     return 'inline'
   }
 
@@ -389,7 +391,7 @@ const zoom = d => {
       //   return 'inline'
       // }
 
-      if(focus === d.parent) {
+      if(focus === d.parent || (focus.parent === d.parent && d !== focus)) {
         return 'inline'
       }
 
