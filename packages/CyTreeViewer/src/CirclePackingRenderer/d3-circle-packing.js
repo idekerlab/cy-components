@@ -496,6 +496,13 @@ const hideTooltip = div => {
 
 let selectedGroups = null
 
+
+/**
+ * Show selection by changing color and size
+ *
+ * @param selected
+ * @param fillColor
+ */
 export const selectNodes = (selected, fillColor = 'red') => {
   if (selected === null || selected === undefined || selected.length === 0) {
     return
@@ -509,7 +516,10 @@ export const selectNodes = (selected, fillColor = 'red') => {
     )
 
   selectedGroups = d3Selection.selectAll(selectedCircles)
-  selectedGroups.style('fill', fillColor).style('display', 'inline')
+  selectedGroups
+    .style('fill', fillColor)
+    .style('display', 'inline')
+    // .attr('r', d => d.r * 2)
 }
 
 export const fit = () => {
