@@ -53,6 +53,16 @@ class CytoscapeJsRenderer extends Component {
     cy.add(network.elements.nodes)
     cy.add(network.elements.edges)
 
+    cy.elements('edge')
+      .on('mouseover', evt => {
+        const edge = evt.target
+        edge.style('text-opacity', 1)
+      })
+      .on('mouseout', evt => {
+        const edge = evt.target
+        edge.style('text-opacity', 0)
+      })
+
     cy.endBatch()
 
     // Apply optional filter if available
@@ -243,7 +253,7 @@ class CytoscapeJsRenderer extends Component {
 
     try {
       this.updateCyjs(nextProps.network)
-    } catch(e) {
+    } catch (e) {
       console.warn('Error in Cyjs renderer:', e)
     }
   }
@@ -399,7 +409,10 @@ class CytoscapeJsRenderer extends Component {
 
       cy.fit(target, 400)
     } else if (commandName === 'filter') {
-      console.log('------------ CyJS Filter called 000 ----------', commandParams)
+      console.log(
+        '------------ CyJS Filter called 000 ----------',
+        commandParams
+      )
       const options = commandParams.options
       const filterType = options.type
       const isPrimary = options.isPrimary
@@ -475,6 +488,14 @@ class CytoscapeJsRenderer extends Component {
             'line-color': edgeColor,
             width: 3,
             opacity: 0.95
+          })
+          added.on('mouseover', evt => {
+            const edge = evt.target
+            edge.style('text-opacity', 1)
+          })
+          added.on('mouseout', evt => {
+            const edge = evt.target
+            edge.style('text-opacity', 0)
           })
           this.setState({
             [edgeType]: added
