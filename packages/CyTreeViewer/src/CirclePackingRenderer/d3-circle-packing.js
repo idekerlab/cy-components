@@ -346,19 +346,23 @@ const selectCurrentNodes = (nodes, type) => {
   return d3Selection.selectAll(nodeIds)
 }
 
-const shouldDisplay = (d) => {
+const shouldDisplay = d => {
   currentDepth = focus.depth
 
   const nodeType = d.data.data.NodeType
   const dataDepth = d.depth
 
   // console.log('d and focus parent', d, focus.parent)
-  if (d === focus || focus === d.parent
-    || focus.parent === d.parent || d === focus.parent) {
+  if (
+    d === focus ||
+    focus === d.parent ||
+    focus.parent === d.parent ||
+    d === focus.parent
+  ) {
     return 'inline'
   }
 
-  if(dataDepth <= 1 && nodeType !== 'Gene') {
+  if (dataDepth <= 1 && nodeType !== 'Gene') {
     return 'inline'
   }
 
@@ -369,7 +373,6 @@ const shouldDisplay = (d) => {
   // }
 
   return 'none'
-
 }
 
 const zoom = d => {
@@ -379,7 +382,6 @@ const zoom = d => {
   labels
     .attr('y', d => getFontSize(d) / 2)
     .style('display', d => {
-
       const nodeType = d.data.data.NodeType
 
       // Avoid showing
@@ -391,7 +393,7 @@ const zoom = d => {
       //   return 'inline'
       // }
 
-      if(focus === d.parent || (focus.parent === d.parent && d !== focus)) {
+      if (focus === d.parent || (focus.parent === d.parent && d !== focus)) {
         return 'inline'
       }
 
@@ -426,26 +428,28 @@ const zoom = d => {
     })
     .style('font-size', d => getFontSize(d))
 
-  circleNodes.style('display', d => {
-    return shouldDisplay(d)
+  circleNodes
+    .style('display', d => {
+      return shouldDisplay(d)
+    })
+    .attr('r', d => d.r)
 
-
-    // if (
-    //   focus.parent === d ||
-    //   (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
-    // ) {
-    //   return 'inline'
-    // }
-    //
-    // if (
-    //   d.parent === focus ||
-    //   (currentDepth >= d.depth && d.height >= 1 && d.depth <= 1)
-    // ) {
-    //   return 'inline'
-    // } else {
-    //   return 'none'
-    // }
-  })
+  // if (
+  //   focus.parent === d ||
+  //   (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
+  // ) {
+  //   return 'inline'
+  // }
+  //
+  // if (
+  //   d.parent === focus ||
+  //   (currentDepth >= d.depth && d.height >= 1 && d.depth <= 1)
+  // ) {
+  //   return 'inline'
+  // } else {
+  //   return 'none'
+  // }
+  // })
 
   props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
 }
@@ -476,14 +480,11 @@ const showTooltip = (div, node) => {
     parent = parentNode.data.data.Label
   }
 
-  div
-    .style('opacity', 0.9)
+  div.style('opacity', 0.9)
   div
     .html(
       '<div style="font-size: 1.3em; padding-bottom: 0.5em; line-height: 1.1em; color: #222222">' +
         label +
-        '</div><div>Parent Subsystem: ' +
-        parent +
         '</div>'
     )
     .style('left', d3Selection.event.pageX + 30 + 'px')
@@ -495,7 +496,6 @@ const hideTooltip = div => {
 }
 
 let selectedGroups = null
-
 
 /**
  * Show selection by changing color and size
@@ -519,12 +519,32 @@ export const selectNodes = (selected, fillColor = 'red') => {
   selectedGroups
     .style('fill', fillColor)
     .style('display', 'inline')
-    // .attr('r', d => d.r * 2)
+    .attr('r', d => {
+      const radius = d.r
+      console.log('Selected radius = ', d.r)
+      if (radius < 10) {
+        return 10
+      } else {
+        return radius
+      }
+    })
+
+  // Show labels
+  const selectedLabels = selected
+    .map(id => '#l' + id)
+    .reduce(
+      (previousValue, currentValue, index, array) =>
+        previousValue + ', ' + currentValue
+    )
+  d3Selection
+    .selectAll(selectedLabels)
+    .style('font-size', 9)
+    .style('display', 'inline')
+    .style('fill', '#FFFFFF')
 }
 
 export const fit = () => {
   currentDepth = MAX_DEPTH
-
   const trans = d3Zoom.zoomIdentity.translate(width / 2, height / 2).scale(1)
 
   svg.call(zoom2.transform, trans)
