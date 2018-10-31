@@ -1,5 +1,4 @@
 import * as d3Selection from 'd3-selection'
-// import * as d3Hierarchy from './CustomCirclePacking'
 import * as d3Hierarchy from 'd3-hierarchy'
 import * as d3Zoom from 'd3-zoom'
 
@@ -11,7 +10,6 @@ import getRoot from './hierarchy-factory'
 let colorMapper = null
 const MARGIN = 50
 const MAX_DEPTH = 3
-const TRANSITION_DURATION = 400
 
 // TODO: Manage these states in React way
 let currentDepth = 0
@@ -35,11 +33,11 @@ let circleNodes
 let labels
 
 let root
+let rootNode
 
 let selectedCircle
 let subSelected = new Map()
-
-const currentSet = new Set()
+let selectedSubsystem = null
 
 let nodeCount = 0
 
@@ -51,7 +49,13 @@ let svg = null
 let tooltip = null
 let zoom2 = null
 
+let currentNodes = []
+let d3circles = null
+
 const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
+  // For performance checking
+  const t0 = performance.now()
+
   props = originalProps
 
   colorMapper = getColorMap(
@@ -66,14 +70,6 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   height = height1
 
   diameter = +svg.attr('height')
-
-  // Base setting.
-  g = svg.append('g')
-  // .attr('transform', 'translate(' + diameter / 2 + ',' + diameter / 2 + ')')
-
-  const zoomed2 = () => {
-    g.attr('transform', d3Selection.event.transform)
-  }
 
   // Generate tree and get the root node
   root = getRoot(tree)
@@ -90,10 +86,27 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
     .size([diameter - MARGIN, diameter - MARGIN])
     .padding(1)
 
-  let rootNode = pack(root)
-  let nodes = rootNode.descendants()
-
+  rootNode = pack(root.sum(d => d.data.value))
+  let nodes = rootNode.descendants().filter(node => {
+    if (node.depth < 2) {
+      return true
+    } else {
+      return false
+    }
+  })
+  // let nodes = rootNode.children
+  console.log('D3 layout finished:', performance.now() - t0)
   nodeCount = nodes.length
+
+  currentNodes = nodes
+  // Base setting.
+  g = svg
+    .append('g')
+    .attr('transform', 'translate(' + diameter / 2 + ',' + diameter / 2 + ')')
+
+  const zoomed2 = () => {
+    g.attr('transform', d3Selection.event.transform)
+  }
 
   zoom2 = d3Zoom
     .zoom()
@@ -105,8 +118,14 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
 
   svg.on('dblclick.zoom', null)
 
+  const t1 = performance.now()
+  console.log('## 2nd children', nodes)
   circle = addCircles(g, nodes)
+  console.log('D3 add circle:', performance.now() - t1)
+
+  const t2 = performance.now()
   addLabels(g, nodes)
+  console.log('D3 add label:', performance.now() - t2)
 
   // Now label map is available.
   const labelSizes = [...labelSizeMap.values()]
@@ -140,6 +159,8 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
 
   const initialPosition = [root.x, root.y, root.r * 2 + MARGIN]
   zoomTo(initialPosition)
+
+  console.log('D3 layout total:', performance.now() - t0)
 }
 
 const getLabelThreshold = nodes => {
@@ -179,26 +200,49 @@ const createSizeMap = d => {
 }
 
 const addLabels = (container, data) => {
-  // const firstChildren = root.children
-  // const thPoint = Math.floor(firstChildren.length * 0.8)
+  // Size filter: do not show small labels
+  const filtered = data.filter(d => {
+    const labelSize = getFontSize(d)
+    // console.log(labelSize)
 
-  // const values = firstChildren.map(child => child.value).sort((a, b) => a - b)
+    if (
+      d.parent !== null &&
+      selectedSubsystem !== null &&
+      d.parent === selectedSubsystem
+    ) {
+      // console.log('parent and selected system = ', d.parent, selectedSubsystem)
+      if (d !== selectedSubsystem && labelSize > 0.6) {
+        return true
+      }
+    }
 
-  // const th = values[thPoint]
+    if (labelSize < 4) {
+      return false
+    } else {
+      if (d.depth === 1) {
+        return true
+      }
+    }
 
-  return container
-    .selectAll('text')
-    .data(data)
-    .enter()
-    .append('text')
-    .attr('id', d => 'l' + d.data.id)
-    .style('fill', d => getLabelColor(d))
-    .style('text-anchor', 'middle')
-    .attr('class', 'label')
-    .text(d => d.data.data.Label)
-    .style('font-size', d => createSizeMap(d))
-    .style('display', 'none')
-  // .call(getLabels)
+    return false
+  })
+  const currentLabels = container.selectAll('text').data(filtered)
+
+  currentLabels.exit().remove()
+
+  return (
+    currentLabels
+      .enter()
+      .append('text')
+      .attr('id', d => 'l' + d.data.id)
+      .attr('class', 'label')
+      .style('fill', d => getLabelColor(d))
+      .style('text-anchor', 'middle')
+      .attr('x', d => d.x)
+      .attr('y', d => d.y)
+      .text(d => d.data.data.Label)
+      .style('font-size', d => createSizeMap(d))
+  )
 }
 
 const getLabelColor = d => {
@@ -218,6 +262,8 @@ const getLabelColor = d => {
 }
 
 const expand = (d, i, nodes) => {
+  selectedSubsystem = d
+
   if (selectedCircle !== undefined) {
     selectedCircle.classed('node-selected', false)
   }
@@ -232,6 +278,33 @@ const expand = (d, i, nodes) => {
   selectedCircle = d3Selection.select(nodes[i])
   selectedCircle.classed('node-selected', true)
 
+  console.log('*** Selected circle:', d, selectedCircle)
+
+  g.selectAll('circle')
+    .data([])
+    .exit()
+    .remove()
+  g.selectAll('text')
+    .data([])
+    .exit()
+    .remove()
+
+  const newNodes = rootNode.descendants().filter(node => {
+    if (node.depth < 2) {
+      return true
+    } else {
+      return false
+    }
+  })
+
+  newNodes.push(d)
+  d.children.forEach(child => {
+    newNodes.push(child)
+  })
+
+  addCircles(g, newNodes)
+  addLabels(g, newNodes)
+
   if (focus !== d || !focus.parent) {
     zoom(d)
     d3Selection.event.stopPropagation()
@@ -239,61 +312,54 @@ const expand = (d, i, nodes) => {
 }
 
 const addCircles = (container, data) => {
-  return container
-    .selectAll('circle')
-    .data(data)
+  // console.log('* Adding to:', container, data)
+
+  d3circles = g.selectAll('circle').data(data)
+  const result = d3circles
     .enter()
     .append('circle')
     .attr('id', d => 'c' + d.data.id)
-    .attr('class', function(d) {
+    .attr('class', d => {
       return d.parent ? (d.children ? 'node' : 'node node--leaf') : 'node'
     })
-    .style('display', function(d) {
-      if (d.parent === focus) {
-        currentSet.add(d)
-      }
-
-      if (d === root || (d.depth < MAX_DEPTH && d.parent === root)) {
-        return 'inline'
-      } else {
-        return 'none'
-      }
+    .attr('r', function(d) {
+      return d.r
     })
-    .style('fill', function(d) {
-      const data = d.data.data
-
-      // This is a hidden node.
-      if (data.props.Hidden === true) {
-        if (data.NodeType !== 'Gene') {
-          return 'orange'
-          // } else {
-          //   return '#238b45'
-        }
-      }
-
-      if (d.children) {
-        return colorMapper(d.depth)
-      } else {
-        if (data.NodeType !== 'Gene') {
-          return colorMapper(d.depth)
-        }
-
-        return 'rgba(255, 255, 255, 0.8)'
-      }
-    })
+    // .style('fill', function (d) {
+    //   const data = d.data.data
+    //
+    //   // // This is a hidden node.
+    //   // if (data.props.Hidden === true) {
+    //   //   if (data.NodeType !== 'Gene') {
+    //   //     return 'orange'
+    //   //     // } else {
+    //   //     //   return '#238b45'
+    //   //   }
+    //   // }
+    //
+    //   if (d.children) {
+    //     return colorMapper(d.depth)
+    //   } else {
+    //     if (data.NodeType !== 'Gene') {
+    //       return colorMapper(d.depth)
+    //     }
+    //
+    //     return 'rgba(255, 255, 255, 0.8)'
+    //   }
+    // })
     .on('click', (d, i, nodes) => {
       if (d === undefined) {
         return
       }
-
       hideTooltip(tooltip)
-      console.log('* Circle clicked: ', d, i)
     })
     .on('dblclick', (d, i, nodes) => {
       if (d === undefined) {
         return
       }
       hideTooltip(tooltip)
+
+      console.log('DBL handler:', d)
       expand(d, i, nodes)
     })
     .on('mouseover', (d, i, nodes) => {
@@ -302,7 +368,7 @@ const addCircles = (container, data) => {
     })
     .on('mouseout', (d, i, nodes) => {
       hideTooltip(tooltip)
-      props.eventHandlers.hoverOutNode(d.data.id, d.data.data.props)
+      handleMouseOut(d, props)
     })
     .on('contextmenu', (d, i, nodes) => {
       if (d === undefined) {
@@ -339,6 +405,28 @@ const addCircles = (container, data) => {
         props.eventHandlers.selectNodes(d.data.id, d.data.data.props)
       }
     })
+
+  result
+    .style('fill', function(d) {
+      const data = d.data.data
+      if (d.children) {
+        return colorMapper(d.depth)
+      } else {
+        if (data.NodeType !== 'Gene') {
+          return colorMapper(d.depth)
+        }
+        return 'rgba(255, 255, 255, 0.8)'
+      }
+    })
+    .attr('r', d => d.r)
+    .attr('cx', d => d.x)
+    .attr('cy', d => d.y)
+
+  d3circles.exit().remove()
+
+  console.log('d3c2:', result)
+
+  return result
 }
 
 const selectCurrentNodes = (nodes, type) => {
@@ -379,77 +467,78 @@ const zoom = d => {
   // Update current focus
   focus = d
 
-  labels
-    .attr('y', d => getFontSize(d) / 2)
-    .style('display', d => {
-      const nodeType = d.data.data.NodeType
-
-      // Avoid showing
-      // if (d === focus && d.height !== 0) {
-      //   return 'none'
-      // }
-
-      // if (d === focus) {
-      //   return 'inline'
-      // }
-
-      if (focus === d.parent || (focus.parent === d.parent && d !== focus)) {
-        return 'inline'
-      }
-
-      return 'none'
-
-      // if (focus.children !== undefined && focus.children.length < 100) {
-      //   if (
-      //     d.parent === focus ||
-      //     (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
-      //   ) {
-      //     return 'inline'
-      //   } else {
-      //     return 'none'
-      //   }
-      // } else {
-      //   const size = labelSizeMap.get(d.data.id)
-      //   if (
-      //     size > sizeTh &&
-      //     (d.parent === focus ||
-      //       (focus.parent === d.parent &&
-      //         d.parent.depth === focus.parent.depth))
-      //   ) {
-      //     return 'inline'
-      //   } else {
-      //     return 'none'
-      //   }
-      // }
-
-      // if (d.parent !== focus) {
-      //   return 'none'
-      // }
-    })
-    .style('font-size', d => getFontSize(d))
-
-  circleNodes
-    .style('display', d => {
-      return shouldDisplay(d)
-    })
-    .attr('r', d => d.r)
-
-  // if (
-  //   focus.parent === d ||
-  //   (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
-  // ) {
-  //   return 'inline'
-  // }
+  // labels
+  //   .attr('y', d => getFontSize(d) / 2)
+  //   .style('display', d => {
+  //     const nodeType = d.data.data.NodeType
   //
-  // if (
-  //   d.parent === focus ||
-  //   (currentDepth >= d.depth && d.height >= 1 && d.depth <= 1)
-  // ) {
-  //   return 'inline'
-  // } else {
-  //   return 'none'
-  // }
-  // })
+  //     // Avoid showing
+  //     // if (d === focus && d.height !== 0) {
+  //     //   return 'none'
+  //     // }
+  //
+  //     // if (d === focus) {
+  //     //   return 'inline'
+  //     // }
+  //
+  //     if (focus === d.parent || (focus.parent === d.parent && d !== focus)) {
+  //       return 'inline'
+  //     }
+  //
+  //     return 'none'
+  //
+  //     // if (focus.children !== undefined && focus.children.length < 100) {
+  //     //   if (
+  //     //     d.parent === focus ||
+  //     //     (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
+  //     //   ) {
+  //     //     return 'inline'
+  //     //   } else {
+  //     //     return 'none'
+  //     //   }
+  //     // } else {
+  //     //   const size = labelSizeMap.get(d.data.id)
+  //     //   if (
+  //     //     size > sizeTh &&
+  //     //     (d.parent === focus ||
+  //     //       (focus.parent === d.parent &&
+  //     //         d.parent.depth === focus.parent.depth))
+  //     //   ) {
+  //     //     return 'inline'
+  //     //   } else {
+  //     //     return 'none'
+  //     //   }
+  //     // }
+  //
+  //     // if (d.parent !== focus) {
+  //     //   return 'none'
+  //     // }
+  //   })
+  //   .style('font-size', d => getFontSize(d))
+  //
+  // circleNodes
+  //   .style('display', 'inline')
+  //   // .style('display', d => {
+  //   //   return shouldDisplay(d)
+  //   // })
+  //   .attr('r', d => d.r)
+  //
+  // // if (
+  // //   focus.parent === d ||
+  // //   (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
+  // // ) {
+  // //   return 'inline'
+  // // }
+  // //
+  // // if (
+  // //   d.parent === focus ||
+  // //   (currentDepth >= d.depth && d.height >= 1 && d.depth <= 1)
+  // // ) {
+  // //   return 'inline'
+  // // } else {
+  // //   return 'none'
+  // // }
+  // // })
 
   props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
 }
@@ -466,8 +555,42 @@ const zoomTo = v => {
   circle.attr('r', d => d.r * k)
 }
 
+let running = false
 const handleMouseOver = (d, i, nodes, props) => {
-  props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent)
+
+  const parent = d.parent
+
+  if(parent === selectedSubsystem) {
+
+    setTimeout(() => {
+      if(running) {
+        return
+      } else {
+        console.log('FIRE##################,')
+        running = true
+        props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent)
+        running = false
+      }
+    }, 2)
+  }
+}
+
+const handleMouseOut = (d, props) => {
+  const parent = d.parent
+
+  if(parent === selectedSubsystem) {
+
+    setTimeout(() => {
+      if(running) {
+        return
+      } else {
+        console.log('FIRE##################out,')
+        running = true
+        props.eventHandlers.hoverOutNode(d.data.id, d.data.data.props)
+        running = false
+      }
+    }, 2)
+  }
 }
 
 const showTooltip = (div, node) => {
