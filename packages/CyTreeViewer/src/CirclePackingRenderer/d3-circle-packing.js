@@ -52,9 +52,14 @@ let zoom2 = null
 let currentNodes = []
 let d3circles = null
 
+/**
+ * Main function to generate circle packing
+ *
+ */
 const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   // For performance checking
   const t0 = performance.now()
+  console.log('============ D3 CC start======================:')
 
   props = originalProps
 
@@ -71,8 +76,10 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
 
   diameter = +svg.attr('height')
 
+  const t01 = performance.now()
   // Generate tree and get the root node
   root = getRoot(tree)
+  console.log('@GetRoot:', performance.now() - t01)
 
   // This is the height of the main tree
   treeHeight = root.height
@@ -86,23 +93,24 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
     .size([diameter - MARGIN, diameter - MARGIN])
     .padding(1)
 
+  // Perform Circle Packing layout
+  // TODO: externalize this (Node.js Server)
+  const t03 = performance.now()
   rootNode = pack(root.sum(d => d.data.value))
-  let nodes = rootNode.descendants().filter(node => {
-    if (node.depth < 2) {
-      return true
-    } else {
-      return false
-    }
-  })
+  console.log('@Calc packing:', performance.now() - t03)
+
+  // Filter nodes: pick only 1st children
+  let nodes = rootNode.children
+
   // let nodes = rootNode.children
-  console.log('D3 layout finished:', performance.now() - t0)
+  console.log('* D3 prepare & layout total:', performance.now() - t0)
   nodeCount = nodes.length
 
   currentNodes = nodes
   // Base setting.
-  g = svg
-    .append('g')
-    .attr('transform', 'translate(' + diameter / 2 + ',' + diameter / 2 + ')')
+  g = svg.append('g')
+  // .attr('transform', 'translate(' + diameter / 2 + ',' + diameter / 2 + ')')
+  // .attr('transform', 'translate(0,0)')
 
   const zoomed2 = () => {
     g.attr('transform', d3Selection.event.transform)
@@ -114,18 +122,9 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
     .on('zoom', zoomed2)
 
   svg.call(zoom2)
-  zoom2.translateBy(svg, width / 2, height / 2)
+  // zoom2.translateBy(svg, width / 2, height / 2)
 
   svg.on('dblclick.zoom', null)
-
-  const t1 = performance.now()
-  console.log('## 2nd children', nodes)
-  circle = addCircles(g, nodes)
-  console.log('D3 add circle:', performance.now() - t1)
-
-  const t2 = performance.now()
-  addLabels(g, nodes)
-  console.log('D3 add label:', performance.now() - t2)
 
   // Now label map is available.
   const labelSizes = [...labelSizeMap.values()]
@@ -158,9 +157,11 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   svg.style('background', '#FFFFFF')
 
   const initialPosition = [root.x, root.y, root.r * 2 + MARGIN]
-  zoomTo(initialPosition)
+  // zoomTo(initialPosition)
 
-  console.log('D3 layout total:', performance.now() - t0)
+  expand(rootNode)
+
+  console.log('D3 Initial layout total:', performance.now() - t0)
 }
 
 const getLabelThreshold = nodes => {
@@ -230,19 +231,17 @@ const addLabels = (container, data) => {
 
   currentLabels.exit().remove()
 
-  return (
-    currentLabels
-      .enter()
-      .append('text')
-      .attr('id', d => 'l' + d.data.id)
-      .attr('class', 'label')
-      .style('fill', d => getLabelColor(d))
-      .style('text-anchor', 'middle')
-      .attr('x', d => d.x)
-      .attr('y', d => d.y)
-      .text(d => d.data.data.Label)
-      .style('font-size', d => createSizeMap(d))
-  )
+  return currentLabels
+    .enter()
+    .append('text')
+    .attr('id', d => 'l' + d.data.id)
+    .attr('class', 'label')
+    .style('fill', d => getLabelColor(d))
+    .style('text-anchor', 'middle')
+    .attr('x', d => d.x)
+    .attr('y', d => d.y)
+    .text(d => d.data.data.Label)
+    .style('font-size', d => createSizeMap(d))
 }
 
 const getLabelColor = d => {
@@ -275,8 +274,10 @@ const expand = (d, i, nodes) => {
   subSelected.clear()
 
   // Change border
-  selectedCircle = d3Selection.select(nodes[i])
-  selectedCircle.classed('node-selected', true)
+  if (nodes !== undefined) {
+    selectedCircle = d3Selection.select(nodes[i])
+    selectedCircle.classed('node-selected', true)
+  }
 
   console.log('*** Selected circle:', d, selectedCircle)
 
@@ -307,13 +308,14 @@ const expand = (d, i, nodes) => {
 
   if (focus !== d || !focus.parent) {
     zoom(d)
-    d3Selection.event.stopPropagation()
+
+    if (d3Selection.event !== undefined && d3Selection.event !== null) {
+      d3Selection.event.stopPropagation()
+    }
   }
 }
 
 const addCircles = (container, data) => {
-  // console.log('* Adding to:', container, data)
-
   d3circles = g.selectAll('circle').data(data)
   const result = d3circles
     .enter()
@@ -322,9 +324,11 @@ const addCircles = (container, data) => {
     .attr('class', d => {
       return d.parent ? (d.children ? 'node' : 'node node--leaf') : 'node'
     })
-    .attr('r', function(d) {
-      return d.r
-    })
+    // .attr('r', function(d) {
+    //   return d.r
+    // })
+    // .attr('cx', d => d.x)
+    // .attr('cy', d => d.y)
     // .style('fill', function (d) {
     //   const data = d.data.data
     //
@@ -557,13 +561,11 @@ const zoomTo = v => {
 
 let running = false
 const handleMouseOver = (d, i, nodes, props) => {
-
   const parent = d.parent
 
-  if(parent === selectedSubsystem) {
-
+  if (parent === selectedSubsystem) {
     setTimeout(() => {
-      if(running) {
+      if (running) {
         return
       } else {
         console.log('FIRE##################,')
@@ -578,10 +580,9 @@ const handleMouseOver = (d, i, nodes, props) => {
 const handleMouseOut = (d, props) => {
   const parent = d.parent
 
-  if(parent === selectedSubsystem) {
-
+  if (parent === selectedSubsystem) {
     setTimeout(() => {
-      if(running) {
+      if (running) {
         return
       } else {
         console.log('FIRE##################out,')
