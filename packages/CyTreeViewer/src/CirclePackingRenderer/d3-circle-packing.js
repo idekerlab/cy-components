@@ -288,13 +288,8 @@ const expand = (d, i, nodes) => {
   console.log('* AddLabel and circle:', performance.now() - t002)
 
   if (focus !== d || !focus.parent) {
-    focus = d
 
-
-    if(d !== rootNode) {
-      props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
-    }
-
+    zoom(d)
     if (d3Selection.event !== undefined && d3Selection.event !== null) {
       d3Selection.event.stopPropagation()
     }
@@ -412,9 +407,7 @@ const addCircles = (container, data) => {
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
 
-  d3circles.exit().remove()
-
-  console.log('d3c2:', result)
+  // d3circles.exit().remove()
 
   return result
 }
@@ -424,111 +417,15 @@ const selectCurrentNodes = (nodes, type) => {
   return d3Selection.selectAll(nodeIds)
 }
 
-const shouldDisplay = d => {
-  currentDepth = focus.depth
-
-  const nodeType = d.data.data.NodeType
-  const dataDepth = d.depth
-
-  // console.log('d and focus parent', d, focus.parent)
-  if (
-    d === focus ||
-    focus === d.parent ||
-    focus.parent === d.parent ||
-    d === focus.parent
-  ) {
-    return 'inline'
-  }
-
-  if (dataDepth <= 1 && nodeType !== 'Gene') {
-    return 'inline'
-  }
-
-  // if(currentDepth > dataDepth) {
-  //   if(nodeType !== 'Gene' && dataDepth < 3) {
-  //     return 'inline'
-  //   }
-  // }
-
-  return 'none'
-}
-
 const zoom = d => {
   // Update current focus
+  focus = d
+  if(d !== rootNode) {
 
-  // labels
-  //   .attr('y', d => getFontSize(d) / 2)
-  //   .style('display', d => {
-  //     const nodeType = d.data.data.NodeType
-  //
-  //     // Avoid showing
-  //     // if (d === focus && d.height !== 0) {
-  //     //   return 'none'
-  //     // }
-  //
-  //     // if (d === focus) {
-  //     //   return 'inline'
-  //     // }
-  //
-  //     if (focus === d.parent || (focus.parent === d.parent && d !== focus)) {
-  //       return 'inline'
-  //     }
-  //
-  //     return 'none'
-  //
-  //     // if (focus.children !== undefined && focus.children.length < 100) {
-  //     //   if (
-  //     //     d.parent === focus ||
-  //     //     (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
-  //     //   ) {
-  //     //     return 'inline'
-  //     //   } else {
-  //     //     return 'none'
-  //     //   }
-  //     // } else {
-  //     //   const size = labelSizeMap.get(d.data.id)
-  //     //   if (
-  //     //     size > sizeTh &&
-  //     //     (d.parent === focus ||
-  //     //       (focus.parent === d.parent &&
-  //     //         d.parent.depth === focus.parent.depth))
-  //     //   ) {
-  //     //     return 'inline'
-  //     //   } else {
-  //     //     return 'none'
-  //     //   }
-  //     // }
-  //
-  //     // if (d.parent !== focus) {
-  //     //   return 'none'
-  //     // }
-  //   })
-  //   .style('font-size', d => getFontSize(d))
-  //
-  // circleNodes
-  //   .style('display', 'inline')
-  //   // .style('display', d => {
-  //   //   return shouldDisplay(d)
-  //   // })
-  //   .attr('r', d => d.r)
-  //
-  // // if (
-  // //   focus.parent === d ||
-  // //   (focus.parent === d.parent && d.parent.depth === focus.parent.depth)
-  // // ) {
-  // //   return 'inline'
-  // // }
-  // //
-  // // if (
-  // //   d.parent === focus ||
-  // //   (currentDepth >= d.depth && d.height >= 1 && d.depth <= 1)
-  // // ) {
-  // //   return 'inline'
-  // // } else {
-  // //   return 'none'
-  // // }
-  // // })
-
+    setTimeout(() => {
+      props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
+    }, 2)
+  }
 }
 
 const zoomTo = v => {
@@ -552,7 +449,6 @@ const handleMouseOver = (d, i, nodes, props) => {
       if (running) {
         return
       } else {
-        console.log('FIRE##################,')
         running = true
         props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent)
         running = false
@@ -569,7 +465,6 @@ const handleMouseOut = (d, props) => {
       if (running) {
         return
       } else {
-        console.log('FIRE##################out,')
         running = true
         props.eventHandlers.hoverOutNode(d.data.id, d.data.data.props)
         running = false
