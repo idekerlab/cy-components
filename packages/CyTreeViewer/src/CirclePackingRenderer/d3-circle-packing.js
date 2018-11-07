@@ -69,7 +69,7 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   )
 
   tooltip = getTooltip()
-  svg = getSvg(svgTree, width1, height1)
+  svg = getSvg(svgTree, width1, height1).style('background', '#FFFFFF')
 
   width = width1
   height = height1
@@ -109,9 +109,8 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   currentNodes = nodes
   // Base setting.
   g = svg.append('g')
-  // .attr('transform', 'translate(' + diameter / 2 + ',' + diameter / 2 + ')')
-  // .attr('transform', 'translate(0,0)')
 
+  const t02 = performance.now()
   const zoomed2 = () => {
     g.attr('transform', d3Selection.event.transform)
   }
@@ -121,10 +120,10 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
     .scaleExtent([1 / 10, 500])
     .on('zoom', zoomed2)
 
-  svg.call(zoom2)
-  // zoom2.translateBy(svg, width / 2, height / 2)
+  svg.call(zoom2).on('dblclick.zoom', null)
 
-  svg.on('dblclick.zoom', null)
+  console.log('* Zoom time:', performance.now() - t02)
+
 
   // Now label map is available.
   const labelSizes = [...labelSizeMap.values()]
@@ -133,7 +132,6 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   sizeTh = sorted[Math.floor(sorted.length * 0.85)]
 
   const labelTargets = selectCurrentNodes(root.children, 'l')
-  const th = getLabelThreshold(root.children)
 
   labelTargets
     .style('display', d => {
@@ -144,32 +142,21 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
       } else {
         return 'none'
       }
-
-      // if (d !== root && d.value > th) {
-      //   return 'inline'
-      // }
     })
     .style('font-size', d => labelSizeMap.get(d.data.id))
 
   node = g.selectAll('circle,text')
   circleNodes = g.selectAll('circle')
   labels = g.selectAll('.label')
-  svg.style('background', '#FFFFFF')
 
-  const initialPosition = [root.x, root.y, root.r * 2 + MARGIN]
-  // zoomTo(initialPosition)
 
+  const t04 = performance.now()
   expand(rootNode)
+  console.log('* EXPAND time:', performance.now() - t04)
 
   console.log('D3 Initial layout total:', performance.now() - t0)
 }
 
-const getLabelThreshold = nodes => {
-  const thPoint = Math.floor(nodes.length * 0.8)
-  const values = nodes.map(child => child.value).sort((a, b) => a - b)
-
-  return values[thPoint]
-}
 
 const getFontSize = d => {
   const txt = d.data.data.Label
@@ -183,15 +170,6 @@ const getFontSize = d => {
   }
 
   return size
-}
-
-// Determine which labels should be displayed or not
-const showLabelOrNot = (d, th) => {
-  if ((d.parent === focus || d === focus) && d.value > th && d !== root) {
-    return 'inline'
-  } else {
-    return 'none'
-  }
 }
 
 const createSizeMap = d => {
@@ -263,6 +241,9 @@ const getLabelColor = d => {
 const expand = (d, i, nodes) => {
   selectedSubsystem = d
 
+  const t001 = performance.now()
+
+  console.log('*** Expand start:')
   if (selectedCircle !== undefined) {
     selectedCircle.classed('node-selected', false)
   }
@@ -278,8 +259,7 @@ const expand = (d, i, nodes) => {
     selectedCircle = d3Selection.select(nodes[i])
     selectedCircle.classed('node-selected', true)
   }
-
-  console.log('*** Selected circle:', d, selectedCircle)
+  console.log('* Expand add class:', performance.now() - t001)
 
   g.selectAll('circle')
     .data([])
@@ -290,24 +270,30 @@ const expand = (d, i, nodes) => {
     .exit()
     .remove()
 
-  const newNodes = rootNode.descendants().filter(node => {
-    if (node.depth < 2) {
+  const t002 = performance.now()
+  let newNodes = rootNode.descendants().filter(node => {
+    if(node.depth < 2) {
       return true
-    } else {
-      return false
     }
+    return false
   })
-
   newNodes.push(d)
+
   d.children.forEach(child => {
     newNodes.push(child)
   })
 
   addCircles(g, newNodes)
   addLabels(g, newNodes)
+  console.log('* AddLabel and circle:', performance.now() - t002)
 
   if (focus !== d || !focus.parent) {
-    zoom(d)
+    focus = d
+
+
+    if(d !== rootNode) {
+      props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
+    }
 
     if (d3Selection.event !== undefined && d3Selection.event !== null) {
       d3Selection.event.stopPropagation()
@@ -469,7 +455,6 @@ const shouldDisplay = d => {
 
 const zoom = d => {
   // Update current focus
-  focus = d
 
   // labels
   //   .attr('y', d => getFontSize(d) / 2)
@@ -544,7 +529,6 @@ const zoom = d => {
   // // }
   // // })
 
-  props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
 }
 
 const zoomTo = v => {
@@ -669,7 +653,7 @@ export const selectNodes = (selected, fillColor = 'red') => {
 
 export const fit = () => {
   currentDepth = MAX_DEPTH
-  const trans = d3Zoom.zoomIdentity.translate(width / 2, height / 2).scale(1)
+  const trans = d3Zoom.zoomIdentity.translate(0, 0).scale(1)
 
   svg.call(zoom2.transform, trans)
 
