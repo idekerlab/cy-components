@@ -177,8 +177,10 @@ const createSizeMap = d => {
 
 const addLabels = (container, data, newFocus) => {
   // Remove everything first
-  g.selectAll('text').data([]).exit().remove()
-
+  g.selectAll('text')
+    .data([])
+    .exit()
+    .remove()
 
   // Size filter: do not show small labels
   const filtered = data.filter(d => {
@@ -200,11 +202,10 @@ const addLabels = (container, data, newFocus) => {
       return false
     } else {
       if (d.depth === 1) {
-
         // Check direct parent or not
         const allChilsren = new Set(d.descendants())
 
-        if(allChilsren.has(newFocus)) {
+        if (allChilsren.has(newFocus)) {
           return false
         } else {
           return true
@@ -215,7 +216,6 @@ const addLabels = (container, data, newFocus) => {
     return false
   })
   const currentLabels = container.selectAll('text').data(filtered)
-
 
   return currentLabels
     .enter()
@@ -247,10 +247,22 @@ const getLabelColor = d => {
 }
 
 const buildData = d => {
+
   let newNodes = rootNode.descendants().filter(node => {
     if (node.depth < 2) {
       return true
     }
+
+    if(node.parent !== null && d.parent !== null) {
+      if(d.parent === node.parent) {
+        return true
+      }
+
+      if(node === d.parent) {
+        return true
+      }
+    }
+
     return false
   })
   newNodes.push(d)
@@ -261,6 +273,13 @@ const buildData = d => {
     })
   }
 
+  // if (d.parent !== null && d.parent.parent !== null) {
+  //   d.parent.parent.children.forEach(child => {
+  //     newNodes.push(child)
+  //   })
+  // }
+
+
   return newNodes
 }
 
@@ -268,16 +287,6 @@ const expand = (d, i, nodes) => {
   selectedSubsystem = d
 
   console.log('*** Expand start ***')
-
-  // g.selectAll('circle')
-  //   .data([])
-  //   .exit()
-  //   .remove()
-  // g.selectAll('text')
-  //   .data([])
-  //   .exit()
-  //   .remove()
-
   const t002 = performance.now()
 
   const newNodes = buildData(d)
@@ -301,7 +310,10 @@ const expand = (d, i, nodes) => {
 }
 
 const addCircles = (container, data, newFocus) => {
-  g.selectAll('circle').data([]).exit().remove()
+  g.selectAll('circle')
+    .data([])
+    .exit()
+    .remove()
 
   d3circles = svg
     .select('g')
@@ -329,8 +341,6 @@ const addCircles = (container, data, newFocus) => {
         return
       }
       hideTooltip(tooltip)
-
-      console.log('DBL handler:', d)
       expand(d, i, nodes)
     })
     .on('mouseover', (d, i, nodes) => {
@@ -390,7 +400,6 @@ const addCircles = (container, data, newFocus) => {
     .attr('r', d => d.r)
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
-
 
   return d3circles
 }
