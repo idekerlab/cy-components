@@ -124,7 +124,6 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
 
   console.log('* Zoom time:', performance.now() - t02)
 
-
   // Now label map is available.
   const labelSizes = [...labelSizeMap.values()]
   const sorted = labelSizes.sort((a, b) => a - b)
@@ -149,14 +148,12 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   circleNodes = g.selectAll('circle')
   labels = g.selectAll('.label')
 
-
   const t04 = performance.now()
   expand(rootNode)
   console.log('* EXPAND time:', performance.now() - t04)
 
   console.log('D3 Initial layout total:', performance.now() - t0)
 }
-
 
 const getFontSize = d => {
   const txt = d.data.data.Label
@@ -178,7 +175,11 @@ const createSizeMap = d => {
   return size
 }
 
-const addLabels = (container, data) => {
+const addLabels = (container, data, newFocus) => {
+  // Remove everything first
+  g.selectAll('text').data([]).exit().remove()
+
+
   // Size filter: do not show small labels
   const filtered = data.filter(d => {
     const labelSize = getFontSize(d)
@@ -199,7 +200,15 @@ const addLabels = (container, data) => {
       return false
     } else {
       if (d.depth === 1) {
-        return true
+
+        // Check direct parent or not
+        const allChilsren = new Set(d.descendants())
+
+        if(allChilsren.has(newFocus)) {
+          return false
+        } else {
+          return true
+        }
       }
     }
 
@@ -207,7 +216,6 @@ const addLabels = (container, data) => {
   })
   const currentLabels = container.selectAll('text').data(filtered)
 
-  currentLabels.exit().remove()
 
   return currentLabels
     .enter()
@@ -238,57 +246,53 @@ const getLabelColor = d => {
   }
 }
 
-const expand = (d, i, nodes) => {
-  selectedSubsystem = d
-
-  const t001 = performance.now()
-
-  console.log('*** Expand start:')
-  if (selectedCircle !== undefined) {
-    selectedCircle.classed('node-selected', false)
-  }
-
-  // Reset sub-selection
-  subSelected.forEach(v => {
-    v.classed('node-selected-sub', false)
-  })
-  subSelected.clear()
-
-  // Change border
-  if (nodes !== undefined) {
-    selectedCircle = d3Selection.select(nodes[i])
-    selectedCircle.classed('node-selected', true)
-  }
-  console.log('* Expand add class:', performance.now() - t001)
-
-  g.selectAll('circle')
-    .data([])
-    .exit()
-    .remove()
-  g.selectAll('text')
-    .data([])
-    .exit()
-    .remove()
-
-  const t002 = performance.now()
+const buildData = d => {
   let newNodes = rootNode.descendants().filter(node => {
-    if(node.depth < 2) {
+    if (node.depth < 2) {
       return true
     }
     return false
   })
   newNodes.push(d)
 
-  d.children.forEach(child => {
-    newNodes.push(child)
-  })
+  if (d.children !== undefined) {
+    d.children.forEach(child => {
+      newNodes.push(child)
+    })
+  }
 
-  addCircles(g, newNodes)
-  addLabels(g, newNodes)
+  return newNodes
+}
+
+const expand = (d, i, nodes) => {
+  selectedSubsystem = d
+
+  console.log('*** Expand start ***')
+
+  // g.selectAll('circle')
+  //   .data([])
+  //   .exit()
+  //   .remove()
+  // g.selectAll('text')
+  //   .data([])
+  //   .exit()
+  //   .remove()
+
+  const t002 = performance.now()
+
+  const newNodes = buildData(d)
+  addCircles(g, newNodes, d)
+  addLabels(g, newNodes, d)
+
+  // Reset sub-selection
+  // subSelected.forEach(v => {
+  //   v.classed('node-selected-sub', false)
+  // })
+  // subSelected.clear()
+
   console.log('* AddLabel and circle:', performance.now() - t002)
 
   if (focus !== d || !focus.parent) {
-
     zoom(d)
     if (d3Selection.event !== undefined && d3Selection.event !== null) {
       d3Selection.event.stopPropagation()
@@ -296,42 +300,24 @@ const expand = (d, i, nodes) => {
   }
 }
 
-const addCircles = (container, data) => {
-  d3circles = g.selectAll('circle').data(data)
-  const result = d3circles
+const addCircles = (container, data, newFocus) => {
+  g.selectAll('circle').data([]).exit().remove()
+
+  d3circles = svg
+    .select('g')
+    .selectAll('circle')
+    .data(data)
+
+  d3circles
     .enter()
     .append('circle')
     .attr('id', d => 'c' + d.data.id)
     .attr('class', d => {
       return d.parent ? (d.children ? 'node' : 'node node--leaf') : 'node'
     })
-    // .attr('r', function(d) {
-    //   return d.r
-    // })
-    // .attr('cx', d => d.x)
-    // .attr('cy', d => d.y)
-    // .style('fill', function (d) {
-    //   const data = d.data.data
-    //
-    //   // // This is a hidden node.
-    //   // if (data.props.Hidden === true) {
-    //   //   if (data.NodeType !== 'Gene') {
-    //   //     return 'orange'
-    //   //     // } else {
-    //   //     //   return '#238b45'
-    //   //   }
-    //   // }
-    //
-    //   if (d.children) {
-    //     return colorMapper(d.depth)
-    //   } else {
-    //     if (data.NodeType !== 'Gene') {
-    //       return colorMapper(d.depth)
-    //     }
-    //
-    //     return 'rgba(255, 255, 255, 0.8)'
-    //   }
-    // })
+    .classed('node-selected', d => {
+      return d === newFocus
+    })
     .on('click', (d, i, nodes) => {
       if (d === undefined) {
         return
@@ -390,8 +376,6 @@ const addCircles = (container, data) => {
         props.eventHandlers.selectNodes(d.data.id, d.data.data.props)
       }
     })
-
-  result
     .style('fill', function(d) {
       const data = d.data.data
       if (d.children) {
@@ -407,9 +391,8 @@ const addCircles = (container, data) => {
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
 
-  // d3circles.exit().remove()
 
-  return result
+  return d3circles
 }
 
 const selectCurrentNodes = (nodes, type) => {
@@ -420,8 +403,7 @@ const selectCurrentNodes = (nodes, type) => {
 const zoom = d => {
   // Update current focus
   focus = d
-  if(d !== rootNode) {
-
+  if (d !== rootNode) {
     setTimeout(() => {
       props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
     }, 2)
