@@ -1,11 +1,10 @@
 import * as d3Selection from 'd3-selection'
-import * as d3Hierarchy from 'd3-hierarchy'
 import * as d3Zoom from 'd3-zoom'
 
 import getColorMap from './colormap-generator'
 import getSvg from './svg-container-factory'
 import getTooltip from './tooltip-factory'
-import getRoot from './hierarchy-factory'
+import layoutTree from './layout-tree'
 
 let colorMapper = null
 const MARGIN = 50
@@ -14,10 +13,7 @@ const MAX_DEPTH = 3
 // TODO: Manage these states in React way
 let currentDepth = 0
 
-let height = 0
-let width = 0
 let g
-let treeHeight = 0
 
 let props
 let focus
@@ -33,9 +29,7 @@ let circleNodes
 let labels
 
 let root
-let rootNode
 
-let selectedCircle
 let subSelected = new Map()
 let selectedSubsystem = null
 
@@ -56,8 +50,7 @@ let d3circles = null
  * Main function to generate circle packing
  *
  */
-const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
-  // For performance checking
+const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   const t0 = performance.now()
   console.log('============ D3 CC start======================:')
 
@@ -69,44 +62,21 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   )
 
   tooltip = getTooltip()
-  svg = getSvg(svgTree, width1, height1).style('background', '#FFFFFF')
-
-  width = width1
-  height = height1
+  svg = getSvg(svgTree, w, h).style('background', '#FFFFFF')
 
   diameter = +svg.attr('height')
 
   const t01 = performance.now()
-  // Generate tree and get the root node
-  root = getRoot(tree)
-  console.log('@GetRoot:', performance.now() - t01)
 
-  // This is the height of the main tree
-  treeHeight = root.height
-
-  // Set initial focus to the root
-  focus = root
-
-  // Get all children
-  const pack = d3Hierarchy
-    .pack()
-    .size([diameter - MARGIN, diameter - MARGIN])
-    .padding(1)
-
-  // Perform Circle Packing layout
-  // TODO: externalize this (Node.js Server)
-  const t03 = performance.now()
-  rootNode = pack(root.sum(d => d.data.value))
-  console.log('@Calc packing:', performance.now() - t03)
-
-  // Filter nodes: pick only 1st children
-  let nodes = rootNode.children
-
-  // let nodes = rootNode.children
-  console.log('* D3 prepare & layout total:', performance.now() - t0)
+  root = layoutTree(tree, diameter, MARGIN)
+  let nodes = root.children
   nodeCount = nodes.length
 
   currentNodes = nodes
+  focus = root
+
+  console.log('@Calc packing:', performance.now() - t01)
+
   // Base setting.
   g = svg.append('g')
 
@@ -149,7 +119,7 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
   labels = g.selectAll('.label')
 
   const t04 = performance.now()
-  expand(rootNode)
+  expand(root)
   console.log('* EXPAND time:', performance.now() - t04)
 
   console.log('D3 Initial layout total:', performance.now() - t0)
@@ -248,7 +218,7 @@ const getLabelColor = d => {
 
 const buildData = d => {
 
-  let newNodes = rootNode.descendants().filter(node => {
+  let newNodes = root.descendants().filter(node => {
     if (node.depth < 2) {
       return true
     }
@@ -412,7 +382,7 @@ const selectCurrentNodes = (nodes, type) => {
 const zoom = d => {
   // Update current focus
   focus = d
-  if (d !== rootNode) {
+  if (d !== root) {
     setTimeout(() => {
       props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
     }, 2)
