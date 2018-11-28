@@ -9,7 +9,7 @@ import getTooltip from './tooltip-factory'
 import getRoot from './hierarchy-factory'
 
 let colorMapper = null
-const MARGIN = 50
+const MARGIN = 10
 const MAX_DEPTH = 3
 const TRANSITION_DURATION = 400
 
@@ -101,7 +101,9 @@ const CirclePacking = (tree, svgTree, width1, height1, originalProps) => {
     .on('zoom', zoomed2)
 
   svg.call(zoom2)
-  zoom2.translateBy(svg, width / 2, height / 2)
+  const windowW = window.innerWidth * 0.67
+  const displacementX = windowW / 2
+  zoom2.translateBy(svg, displacementX, height / 2)
 
   svg.on('dblclick.zoom', null)
 
