@@ -279,12 +279,76 @@ const expand = (d, i, nodes) => {
   }
 }
 
+const expandSearchResult = (results) => {
+
+  // let newNodes = root.descendants()
+  const newNodes = addSearchResults(results, root)
+  // newNodes = newNodes.concat(extra)
+
+  console.log('NEW---------------', newNodes)
+  addCircles(g, newNodes, root)
+  addLabels(g, newNodes, root)
+
+  // Reset sub-selection
+  // subSelected.forEach(v => {
+  //   v.classed('node-selected-sub', false)
+  // })
+  // subSelected.clear()
+
+
+  // if (focus !== d || !focus.parent) {
+  //   zoom(selectedSubsystem)
+  //   if (d3Selection.event !== undefined && d3Selection.event !== null) {
+  //     d3Selection.event.stopPropagation()
+  //   }
+  // }
+}
+
+const addSearchResults = (results) => {
+
+  const selectedSet = new Set(results)
+
+  const allNodes = root.descendants()
+  let idx = allNodes.length
+  let newNodes = []
+  newNodes.push(root)
+
+
+  while(idx--) {
+    const node = allNodes[idx]
+    if (node.depth === 1) {
+      newNodes.push(node)
+    }
+  }
+  console.log('Selection len---------------', newNodes.length)
+
+  // Add selected ones
+  newNodes.push(selectedSubsystem)
+  if (selectedSubsystem.children !== undefined) {
+    selectedSubsystem.children.forEach(child => {
+      newNodes.push(child)
+    })
+  }
+
+  idx = allNodes.length
+  while(idx--) {
+    const node = allNodes[idx]
+    const nodeId = node.data.data.id
+    if (selectedSet.has(nodeId)) {
+      // console.log('Found:', nodeId)
+      newNodes.push(node)
+    }
+  }
+  return newNodes
+}
+
 const addCircles = (container, data, newFocus) => {
   g.selectAll('circle')
     .data([])
     .exit()
     .remove()
 
+  console.log('Removed:::::::::::::, new data=', data)
   d3circles = svg
     .select('g')
     .selectAll('circle')
@@ -358,6 +422,7 @@ const addCircles = (container, data, newFocus) => {
     })
     .style('fill', function(d) {
       const data = d.data.data
+      return colorMapper(d.depth)
       if (d.children) {
         return colorMapper(d.depth)
       } else {
@@ -479,15 +544,21 @@ export const selectNodes = (selected, fillColor = 'red') => {
         previousValue + ', ' + currentValue
     )
 
+  // const newNodes2 = addSearchResults(selected)
+  console.log('ADDED Selection string: ', selectedCircles)
+
+  expandSearchResult(selected)
+
   selectedGroups = d3Selection.selectAll(selectedCircles)
+  console.log('Selection G: ', selectedGroups)
+
   selectedGroups
     .style('fill', fillColor)
     .style('display', 'inline')
     .attr('r', d => {
       const radius = d.r
-      console.log('Selected radius = ', d.r)
-      if (radius < 10) {
-        return 10
+      if (radius < 6) {
+        return 6
       } else {
         return radius
       }

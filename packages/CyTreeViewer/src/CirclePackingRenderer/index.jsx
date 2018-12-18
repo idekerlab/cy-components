@@ -16,6 +16,7 @@ class CirclePackingRenderer extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+
     const rootColor = this.props.rendererOptions.rootColor
     const leafColor = this.props.rendererOptions.leafColor
     const newRootColor = nextProps.rendererOptions.rootColor
@@ -28,6 +29,7 @@ class CirclePackingRenderer extends Component {
       rootColor !== newRootColor ||
       leafColor !== newLeafColor
     ) {
+      console.log('CP rendering!!!:', nextProps)
       CirclePacking(
         nextProps.tree,
         this.tree,
@@ -37,10 +39,8 @@ class CirclePackingRenderer extends Component {
       )
     }
 
-
     const command = nextProps.command
     if(command !== null && command !== this.props.command) {
-
       if(command.command === 'fit') {
         fit()
       } else if(command.command === 'reset') {
