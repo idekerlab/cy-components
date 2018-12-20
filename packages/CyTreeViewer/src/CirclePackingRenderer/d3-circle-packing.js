@@ -285,7 +285,6 @@ const expandSearchResult = (results) => {
   const newNodes = addSearchResults(results, root)
   // newNodes = newNodes.concat(extra)
 
-  console.log('NEW---------------', newNodes)
   addCircles(g, newNodes, root)
   addLabels(g, newNodes, root)
 
@@ -320,7 +319,6 @@ const addSearchResults = (results) => {
       newNodes.push(node)
     }
   }
-  console.log('Selection len---------------', newNodes.length)
 
   // Add selected ones
   newNodes.push(selectedSubsystem)
@@ -348,7 +346,6 @@ const addCircles = (container, data, newFocus) => {
     .exit()
     .remove()
 
-  console.log('Removed:::::::::::::, new data=', data)
   d3circles = svg
     .select('g')
     .selectAll('circle')
@@ -544,13 +541,9 @@ export const selectNodes = (selected, fillColor = 'red') => {
         previousValue + ', ' + currentValue
     )
 
-  // const newNodes2 = addSearchResults(selected)
-  console.log('ADDED Selection string: ', selectedCircles)
-
   expandSearchResult(selected)
 
   selectedGroups = d3Selection.selectAll(selectedCircles)
-  console.log('Selection G: ', selectedGroups)
 
   selectedGroups
     .style('fill', fillColor)

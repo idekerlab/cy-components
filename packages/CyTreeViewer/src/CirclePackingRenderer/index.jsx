@@ -56,6 +56,10 @@ class CirclePackingRenderer extends Component {
     if (nextProps.selected !== this.props.selected) {
       selectNodes(nextProps.selected)
     }
+
+    if(!nextProps.highlight && nextProps.highlight !== this.props.highlight) {
+      ''
+    }
   }
 
   render() {
