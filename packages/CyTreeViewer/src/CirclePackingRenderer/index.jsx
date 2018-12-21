@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import CirclePacking, { selectNodes, fit, clear } from './d3-circle-packing'
+import CirclePacking, { selectNodes, highlightNode, fit, clear } from './d3-circle-packing'
 
 /**
  * React component version of circle packing
@@ -54,11 +54,13 @@ class CirclePackingRenderer extends Component {
     }
 
     if (nextProps.selected !== this.props.selected) {
+      console.log('SELECT called:', nextProps)
       selectNodes(nextProps.selected)
     }
 
     if(!nextProps.highlight && nextProps.highlight !== this.props.highlight) {
-      ''
+      console.log('HIGHLIGHT: ', this.props.highlight)
+      highlightNode(this.props.highlight)
     }
   }
 

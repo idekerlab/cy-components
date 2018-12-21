@@ -571,6 +571,48 @@ export const selectNodes = (selected, fillColor = 'red') => {
     .style('fill', '#FFFFFF')
 }
 
+let lastHighlight = null
+
+export const highlightNode = (selected, fillColor = 'yellow') => {
+  if (selected === null || selected === undefined) {
+    return
+  }
+
+  if(lastHighlight) {
+    lastHighlight
+      .style('fill', 'red')
+      .style('display', 'inline')
+      .attr('r', d => {
+        const radius = d.r
+        if (radius < 6) {
+          return 6
+        } else {
+          return radius
+        }
+      })
+  }
+
+  const selectedCircle = '#c' + selected
+  const highlight = d3Selection.selectAll(selectedCircle)
+
+  if(!highlight) {
+    return
+  }
+
+  highlight
+    .style('fill', fillColor)
+    .style('display', 'inline')
+    .attr('r', d => {
+      const radius = d.r
+      if (radius < 6) {
+        return 10
+      } else {
+        return radius * 1.5
+      }
+    })
+  lastHighlight = highlight
+}
+
 export const fit = () => {
   currentDepth = MAX_DEPTH
   const trans = d3Zoom.zoomIdentity.translate(0, 0).scale(1)
