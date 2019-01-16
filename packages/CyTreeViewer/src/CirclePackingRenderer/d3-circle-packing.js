@@ -165,6 +165,8 @@ const addLabels = (container, data, newFocus) => {
       // console.log('parent and selected system = ', d.parent, selectedSubsystem)
       if (d !== selectedSubsystem && labelSize > 0.6) {
         return true
+      } else if (d.parent === selectedSubsystem) {
+        return true
       }
     }
 
