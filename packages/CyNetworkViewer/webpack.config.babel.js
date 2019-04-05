@@ -1,9 +1,9 @@
-const webpack = require('webpack');
-const path = require('path');
+const webpack = require('webpack')
+const path = require('path')
 
 export default () => ({
   // devtool: 'inline-source-map',
-  devtool: "source-map",
+  devtool: 'source-map',
   context: path.join(__dirname, './src'),
 
   entry: {
@@ -11,10 +11,10 @@ export default () => ({
   },
 
   output: {
-    path: path.join(__dirname, "build"),
-    library: "CyNetworkViewer",
-    libraryTarget: "umd",
-    filename: "CyNetworkViewer.js"
+    path: path.join(__dirname, 'build'),
+    library: 'CyNetworkViewer',
+    libraryTarget: 'umd',
+    filename: 'CyNetworkViewer.js'
   },
 
   module: {
@@ -29,7 +29,7 @@ export default () => ({
     ]
   },
   externals: {
-    'react': {
+    react: {
       commonjs: 'react',
       commonjs2: 'react',
       amd: 'react',
@@ -41,7 +41,7 @@ export default () => ({
       amd: 'prop-types',
       root: 'PropTypes'
     },
-    'immutable': {
+    immutable: {
       commonjs: 'immutable',
       commonjs2: 'immutable',
       amd: 'immutable',
@@ -52,7 +52,5 @@ export default () => ({
     extensions: ['.js', '.jsx']
   },
 
-  plugins: [
-    new webpack.NamedModulesPlugin()
-  ]
-});
+  plugins: [new webpack.NamedModulesPlugin()]
+})
