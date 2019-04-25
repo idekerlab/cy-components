@@ -46,6 +46,9 @@ let zoom2 = null
 let currentNodes = []
 let d3circles = null
 
+
+let selectedCircles = []
+
 /**
  * Main function to generate circle packing
  *
