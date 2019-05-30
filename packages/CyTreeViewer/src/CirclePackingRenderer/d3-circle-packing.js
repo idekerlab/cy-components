@@ -46,14 +46,17 @@ let zoom2 = null
 let currentNodes = []
 let d3circles = null
 
-
-let selectedCircles = []
+let searchResults = []
 
 /**
  * Main function to generate circle packing
  *
  */
 const CirclePacking = (tree, svgTree, w, h, originalProps) => {
+  if (tree === null || tree === undefined) {
+    return
+  }
+
   const t0 = performance.now()
   console.log('============ D3 CC start======================:')
 
@@ -222,18 +225,17 @@ const getLabelColor = d => {
 }
 
 const buildData = d => {
-
   let newNodes = root.descendants().filter(node => {
     if (node.depth < 2) {
       return true
     }
 
-    if(node.parent !== null && d.parent !== null) {
-      if(d.parent === node.parent) {
+    if (node.parent !== null && d.parent !== null) {
+      if (d.parent === node.parent) {
         return true
       }
 
-      if(node === d.parent) {
+      if (node === d.parent) {
         return true
       }
     }
@@ -254,17 +256,19 @@ const buildData = d => {
   //   })
   // }
 
-
   return newNodes
 }
 
 const expand = (d, i, nodes) => {
   selectedSubsystem = d
 
-  console.log('*** Expand start ***')
+  console.log('*** Expand start ***', d)
   const t002 = performance.now()
 
   const newNodes = buildData(d)
+
+  console.log('* build data rime:', performance.now() - t002)
+
   addCircles(g, newNodes, d)
   addLabels(g, newNodes, d)
 
@@ -284,8 +288,7 @@ const expand = (d, i, nodes) => {
   }
 }
 
-const expandSearchResult = (results) => {
-
+const expandSearchResult = results => {
   // let newNodes = root.descendants()
   const newNodes = addSearchResults(results, root)
   // newNodes = newNodes.concat(extra)
@@ -293,12 +296,14 @@ const expandSearchResult = (results) => {
   addCircles(g, newNodes, root)
   addLabels(g, newNodes, root)
 
+  //////////////////TEST TODO: remove this
+  // paintSelectedNodes(selectedGroups)
+
   // Reset sub-selection
   // subSelected.forEach(v => {
   //   v.classed('node-selected-sub', false)
   // })
   // subSelected.clear()
-
 
   // if (focus !== d || !focus.parent) {
   //   zoom(selectedSubsystem)
@@ -308,8 +313,7 @@ const expandSearchResult = (results) => {
   // }
 }
 
-const addSearchResults = (results) => {
-
+const addSearchResults = results => {
   const selectedSet = new Set(results)
 
   const allNodes = root.descendants()
@@ -317,8 +321,7 @@ const addSearchResults = (results) => {
   let newNodes = []
   newNodes.push(root)
 
-
-  while(idx--) {
+  while (idx--) {
     const node = allNodes[idx]
     if (node.depth === 1) {
       newNodes.push(node)
@@ -334,7 +337,7 @@ const addSearchResults = (results) => {
   }
 
   idx = allNodes.length
-  while(idx--) {
+  while (idx--) {
     const node = allNodes[idx]
     const nodeId = node.data.data.id
     if (selectedSet.has(nodeId)) {
@@ -378,6 +381,9 @@ const addCircles = (container, data, newFocus) => {
       }
       hideTooltip(tooltip)
       expand(d, i, nodes)
+
+      // Repaint selected
+      selectNodes(searchResults)
     })
     .on('mouseover', (d, i, nodes) => {
       showTooltip(tooltip, d)
@@ -539,6 +545,8 @@ export const selectNodes = (selected, fillColor = 'red') => {
     return
   }
 
+  searchResults = selected
+
   const selectedCircles = selected
     .map(id => '#c' + id)
     .reduce(
@@ -583,7 +591,7 @@ export const highlightNode = (selected, fillColor = 'yellow') => {
     return
   }
 
-  if(lastHighlight) {
+  if (lastHighlight) {
     lastHighlight
       .style('fill', 'red')
       .style('display', 'inline')
@@ -600,7 +608,7 @@ export const highlightNode = (selected, fillColor = 'yellow') => {
   const selectedCircle = '#c' + selected
   const highlight = d3Selection.selectAll(selectedCircle)
 
-  if(!highlight) {
+  if (!highlight) {
     return
   }
 
@@ -627,30 +635,40 @@ export const fit = () => {
   zoom(root)
 }
 
+/**
+ * Clear extra circles and hilights.
+ */
 export const clear = () => {
   if (selectedGroups === null) {
     return
   }
 
-  selectedGroups.style('fill', function(d) {
-    const data = d.data.data
+  selectedGroups
+    .data([])
+    .exit()
+    .remove()
+  selectedGroups = null
+  searchResults = []
 
-    // This is a hidden node.
-    if (data.props.Hidden === true) {
-      if (data.NodeType !== 'Gene') {
-        return '#DDDDDD'
-      }
-    }
-
-    if (d.children) {
-      return colorMapper(d.depth)
-    } else {
-      if (data.NodeType !== 'Gene') {
-        return colorMapper(d.depth)
-      }
-      return 'rgba(255, 255, 255, 0.3)'
-    }
-  })
+  // selectedGroups.style('fill', function(d) {
+  //   const data = d.data.data
+  //
+  //   // This is a hidden node.
+  //   if (data.props.Hidden === true) {
+  //     if (data.NodeType !== 'Gene') {
+  //       return '#DDDDDD'
+  //     }
+  //   }
+  //
+  //   if (d.children) {
+  //     return colorMapper(d.depth)
+  //   } else {
+  //     if (data.NodeType !== 'Gene') {
+  //       return colorMapper(d.depth)
+  //     }
+  //     return 'rgba(255, 255, 255, 0.3)'
+  //   }
+  // })
 }
 
 export default CirclePacking

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import CirclePacking, {
   selectNodes,
   highlightNode,
@@ -11,11 +11,21 @@ import CirclePacking, {
  */
 const CirclePackingRenderer = props => {
   const treeRef = useRef()
+  const [initialized, setInitialized] = useState(false)
 
   // For initialization
   useEffect(() => {
-    CirclePacking(props.tree, treeRef.current, props.width, props.height, props)
-    console.log('CP initialized!')
+    if (!initialized) {
+      CirclePacking(
+        props.tree,
+        treeRef.current,
+        props.width,
+        props.height,
+        props
+      )
+      console.log('CP initialized!')
+      setInitialized(true)
+    }
   }, [])
 
   useEffect(() => {
@@ -35,13 +45,12 @@ const CirclePackingRenderer = props => {
     highlightNode(props.highlight)
   }, [props.highlight])
 
-  useEffect(() => {
-    CirclePacking(props.tree, treeRef.current, props.width, props.height, props)
-  }, [
-    props.rendererOptions.rootColor,
-    props.rendererOptions.leafColor,
-    props.height
-  ])
+  // useEffect(() => {
+  //   CirclePacking(props.tree, treeRef.current, props.width, props.height, props)
+  // }, [
+  //   // props.rendererOptions.rootColor,
+  //   // props.rendererOptions.leafColor
+  // ])
 
   return <div ref={treeRef} />
 }
