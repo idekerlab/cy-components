@@ -45,12 +45,6 @@ const CirclePackingRenderer = props => {
     highlightNode(props.highlight)
   }, [props.highlight])
 
-  // useEffect(() => {
-  //   CirclePacking(props.tree, treeRef.current, props.width, props.height, props)
-  // }, [
-  //   // props.rendererOptions.rootColor,
-  //   // props.rendererOptions.leafColor
-  // ])
 
   return <div ref={treeRef} />
 }

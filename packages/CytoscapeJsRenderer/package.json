@@ -37,8 +37,6 @@
   "dependencies": {
     "cytoscape": "^3.5.2",
     "cytoscape-cose-bilkent": "^4.0.0",
-    "immutable": "^4.0.0-rc.12",
-    "react": "^16.8.6",
     "sigma": "^1.2.1"
   },
   "peerDependencies": {
