@@ -21,9 +21,11 @@ const layoutTree = (tree, diameter, margin) => {
     d3Hierarchy
       .hierarchy(tree)
       .sum(d => {
-        const value = d.data.value
+        // const value = d.data.value
+        const value = d.data.props.downstreams_clusters
+
         if (value !== undefined) {
-          return value * 10
+          return value
         } else {
           return 10
         }

@@ -1,7 +1,7 @@
 import * as d3Selection from 'd3-selection'
 import * as d3Zoom from 'd3-zoom'
 
-import getColorMap from './colormap-generator'
+import getColorMap, { blueMap, redMap } from './colormap-generator'
 import getSvg from './svg-container-factory'
 import getTooltip from './tooltip-factory'
 import layoutTree from './layout-tree'
@@ -48,6 +48,11 @@ let d3circles = null
 
 let searchResults = []
 
+let showAll = true
+let showLabel = true
+let blueMapper = null
+let redMapper = null
+
 /**
  * Main function to generate circle packing
  *
@@ -58,7 +63,6 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   }
 
   const t0 = performance.now()
-  console.log('============ D3 CC start======================:')
 
   props = originalProps
 
@@ -66,6 +70,9 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
     props.rendererOptions.rootColor,
     props.rendererOptions.leafColor
   )
+
+  blueMapper = blueMap()
+  redMapper = redMap()
 
   tooltip = getTooltip()
   svg = getSvg(svgTree, w, h).style('background', '#FFFFFF')
@@ -75,6 +82,7 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   const t01 = performance.now()
 
   root = layoutTree(tree, diameter, MARGIN)
+
   let nodes = root.children
   nodeCount = nodes.length
 
@@ -108,17 +116,17 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
 
   const labelTargets = selectCurrentNodes(root.children, 'l')
 
-  labelTargets
-    .style('display', d => {
-      const size = labelSizeMap.get(d.data.id)
-
-      if (size > sizeTh) {
-        return 'inline'
-      } else {
-        return 'none'
-      }
-    })
-    .style('font-size', d => labelSizeMap.get(d.data.id))
+  // labelTargets
+  //   .style('display', d => {
+  //     const size = labelSizeMap.get(d.data.id)
+  //
+  //     if (size > sizeTh) {
+  //       return 'inline'
+  //     } else {
+  //       return 'none'
+  //     }
+  //   })
+  //   .style('font-size', d => labelSizeMap.get(d.data.id))
 
   node = g.selectAll('circle,text')
   circleNodes = g.selectAll('circle')
@@ -225,38 +233,40 @@ const getLabelColor = d => {
 }
 
 const buildData = d => {
-  let newNodes = root.descendants().filter(node => {
-    if (node.depth < 2) {
-      return true
-    }
+  return root.descendants()
 
-    if (node.parent !== null && d.parent !== null) {
-      if (d.parent === node.parent) {
-        return true
-      }
-
-      if (node === d.parent) {
-        return true
-      }
-    }
-
-    return false
-  })
-  newNodes.push(d)
-
-  if (d.children !== undefined) {
-    d.children.forEach(child => {
-      newNodes.push(child)
-    })
-  }
-
-  // if (d.parent !== null && d.parent.parent !== null) {
-  //   d.parent.parent.children.forEach(child => {
+  // let newNodes = root.descendants().filter(node => {
+  //   if (node.depth < 2) {
+  //     return true
+  //   }
+  //
+  //   if (node.parent !== null && d.parent !== null) {
+  //     if (d.parent === node.parent) {
+  //       return true
+  //     }
+  //
+  //     if (node === d.parent) {
+  //       return true
+  //     }
+  //   }
+  //
+  //   return false
+  // })
+  // newNodes.push(d)
+  //
+  // if (d.children !== undefined) {
+  //   d.children.forEach(child => {
   //     newNodes.push(child)
   //   })
   // }
-
-  return newNodes
+  //
+  // // if (d.parent !== null && d.parent.parent !== null) {
+  // //   d.parent.parent.children.forEach(child => {
+  // //     newNodes.push(child)
+  // //   })
+  // // }
+  //
+  // return newNodes
 }
 
 const expand = (d, i, nodes) => {
@@ -270,7 +280,7 @@ const expand = (d, i, nodes) => {
   console.log('* build data rime:', performance.now() - t002)
 
   addCircles(g, newNodes, d)
-  addLabels(g, newNodes, d)
+  // addLabels(g, newNodes, d)
 
   // Reset sub-selection
   // subSelected.forEach(v => {
@@ -289,28 +299,10 @@ const expand = (d, i, nodes) => {
 }
 
 const expandSearchResult = results => {
-  // let newNodes = root.descendants()
   const newNodes = addSearchResults(results, root)
-  // newNodes = newNodes.concat(extra)
 
   addCircles(g, newNodes, root)
   addLabels(g, newNodes, root)
-
-  //////////////////TEST TODO: remove this
-  // paintSelectedNodes(selectedGroups)
-
-  // Reset sub-selection
-  // subSelected.forEach(v => {
-  //   v.classed('node-selected-sub', false)
-  // })
-  // subSelected.clear()
-
-  // if (focus !== d || !focus.parent) {
-  //   zoom(selectedSubsystem)
-  //   if (d3Selection.event !== undefined && d3Selection.event !== null) {
-  //     d3Selection.event.stopPropagation()
-  //   }
-  // }
 }
 
 const addSearchResults = results => {
@@ -430,16 +422,43 @@ const addCircles = (container, data, newFocus) => {
     })
     .style('fill', function(d) {
       const data = d.data.data
-      return colorMapper(d.depth)
-      if (d.children) {
-        return colorMapper(d.depth)
-      } else {
-        if (data.NodeType !== 'Gene') {
-          return colorMapper(d.depth)
-        }
-        return 'rgba(255, 255, 255, 0.8)'
+      const color = data.props.Color
+
+      if (color !== undefined) {
+        return color
       }
+
+      if (data.props.BlueNodes) {
+        return blueMapper(d.depth)
+      } else if (data.props.RedNodes) {
+        return redMapper(d.depth)
+      // } else if(d.parent !== undefined && d.parent !== null
+      //   && d.parent.data.data.props.BlueNodes) {
+      //   return '#FFFFFF'
+      }
+
+      return colorMapper(d.depth)
+      // if (d.children) {
+      //   return colorMapper(d.depth)
+      // } else {
+      //   if (data.NodeType !== 'Gene') {
+      //     return colorMapper(d.depth)
+      //   }
+      //   return 'rgba(255, 255, 255, 0.8)'
+      // }
     })
+    // .style('fill-opacity', (d) => {
+    //   if(d.parent !== undefined && d.parent !== null
+    //     && d.parent.data.data.props.BlueNodes) {
+    //     return '0.3'
+    //   }
+    // })
+    // .style('stroke', (d) => {
+    //   if(d.parent !== undefined && d.parent !== null
+    //     && d.parent.data.data.props.BlueNodes) {
+    //     return '#0000EE'
+    //   }
+    // })
     .attr('r', d => d.r)
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
