@@ -1,7 +1,14 @@
 {
-  "name": "root",
+  "name": "cy-components",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
   "devDependencies": {
-    "lerna": "^3.13.1"
+    "lerna": "^3.16.4"
   }
 }

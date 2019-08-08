@@ -1,5 +1,5 @@
 {
-  "name": "cy-tree-viewer",
+  "name": "@cytoscape/cy-tree-viewer",
   "author": "Keiichiro Ono <kono@ucsd.edu>",
   "version": "v0.3.0",
   "description": "React component for tree data visualization",
@@ -78,6 +78,7 @@
     "babel-loader": "^8.0.5",
     "eslint": "^5.16.0",
     "jest": "^24.6.0",
+    "prop-types": "^15.7.2",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   },

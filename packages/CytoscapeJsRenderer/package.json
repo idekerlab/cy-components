@@ -1,5 +1,5 @@
 {
-  "name": "cytoscapejs-renderer",
+  "name": "@cytoscape/cytoscapejs-renderer",
   "author": "Keiichiro Ono <kono@ucsd.edu>",
   "version": "v0.2.0",
   "description": "Network renderer components for CyNetworkViewer. Current version includes Cytoscape.js renderer and Sigma.js renderer.",
@@ -37,10 +37,10 @@
   "dependencies": {
     "cytoscape": "^3.5.2",
     "cytoscape-cose-bilkent": "^4.0.0",
+    "immutable": "^4.0.0-rc.12",
     "sigma": "^1.2.1"
   },
   "peerDependencies": {
-    "immutable": "3.8.2",
     "react": "16.8.6"
   },
   "devDependencies": {

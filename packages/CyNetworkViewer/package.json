@@ -1,5 +1,5 @@
 {
-  "name": "cy-network-viewer",
+  "name": "@cytoscape/cy-network-viewer",
   "author": "Keiichiro Ono <kono@ucsd.edu>",
   "version": "1.1.0",
   "description": "React component for graph data visualization",
@@ -35,8 +35,6 @@
     "url": "https://github.com/CyComponent/CyNetworkViewer/issues"
   },
   "dependencies": {
-    "immutable": "^4.0.0-rc.12",
-    "prop-types": "^15.7.2",
     "shortid": "^2.2.14"
   },
   "peerDependencies": {
@@ -72,6 +70,7 @@
     "babel-loader": "^8.0.5",
     "eslint": "^5.16.0",
     "jest": "^24.6.0",
+    "prop-types": "^15.7.2",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   },
