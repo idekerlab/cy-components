@@ -1,6 +1,6 @@
 # cy-components
 
-## Monorepo for all React components developed by UCSD Ideker lab software team.
+## Monorepo for all React components developed by UCSD Ideker lab software team
 
 ![](docs/images/cytoscape-logo-orange.svg)
 ![](docs/images/react-logo.svg)

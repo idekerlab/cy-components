@@ -1,3 +1,10 @@
 **/node_modules
 **/coverage
 *.log
+.idea/*
+.idea/.gitignore
+.idea/cy-components.iml
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
