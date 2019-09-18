@@ -161,7 +161,6 @@ const addLabels = (container, data, newFocus) => {
   // Size filter: do not show small labels
   const filtered = data.filter(d => {
     const labelSize = getFontSize(d)
-    // console.log(labelSize)
 
     if (
       d.parent !== null &&
@@ -176,18 +175,17 @@ const addLabels = (container, data, newFocus) => {
       }
     }
 
-    if (labelSize < 4) {
+    if (labelSize < 3) {
       return false
     } else {
       if (d.depth === 1) {
-        // Check direct parent or not
-        const allChilsren = new Set(d.descendants())
-
-        if (allChilsren.has(newFocus)) {
+        // Special case: showing search result
+        if (searchResults.length !== 0 && checkParents(selectedSubsystem, d)) {
           return false
-        } else {
-          return true
         }
+        // Check direct parent or not
+        const allChildren = new Set(d.descendants())
+        return !allChildren.has(newFocus)
       }
     }
 
@@ -206,6 +204,27 @@ const addLabels = (container, data, newFocus) => {
     .attr('y', d => d.y)
     .text(d => d.data.data.Label)
     .style('font-size', d => createSizeMap(d))
+}
+
+/**
+ * Check path to the target node.
+ * If there is one, return true.
+ *
+ * @param current
+ * @param target
+ * @returns {boolean}
+ */
+const checkParents = (current, target) => {
+  if(current === target) {
+    return true
+  }
+
+  const parent = current.parent
+  if(parent === undefined || parent === null) {
+    return false
+  }
+
+  return checkParents(parent, target)
 }
 
 const getLabelColor = d => {
@@ -618,7 +637,7 @@ export const highlightNode = (selected, fillColor = 'yellow') => {
     .attr('r', d => {
       const radius = d.r
       if (radius < 6) {
-        return 10
+        return 6
       } else {
         return radius * 1.5
       }
