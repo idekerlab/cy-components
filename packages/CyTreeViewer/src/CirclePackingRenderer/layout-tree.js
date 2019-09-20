@@ -21,30 +21,17 @@ const layoutTree = (tree, diameter, margin) => {
     d3Hierarchy
       .hierarchy(tree)
       .sum(d => {
-        const value = d.data.value
+        const value = d.data.props.downstream_tips
+        // console.log(value)
         if (value !== undefined) {
-          return value * 10
+          return value
         } else {
-          return 10
+          return 1
         }
       })
       .sort((a, b) => b.value - a.value)
   )
-
-  // return pack(root.sum(d => d.data.value))
 }
 
-const getRoot = tree =>
-  d3Hierarchy
-    .hierarchy(tree)
-    .sum(d => {
-      const value = d.data.value
-      if (value !== undefined) {
-        return value * 10
-      } else {
-        return 10
-      }
-    })
-    .sort((a, b) => b.value - a.value)
 
 export default layoutTree

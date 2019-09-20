@@ -1,7 +1,7 @@
 import * as d3Selection from 'd3-selection'
 import * as d3Zoom from 'd3-zoom'
 
-import getColorMap from './colormap-generator'
+import getColorMap, {blueMap, redMap} from './colormap-generator'
 import getSvg from './svg-container-factory'
 import getTooltip from './tooltip-factory'
 import layoutTree from './layout-tree'
@@ -47,6 +47,10 @@ let currentNodes = []
 let d3circles = null
 
 let searchResults = []
+let blueMapper = null
+let redMapper = null
+
+let expandDepth = 1
 
 /**
  * Main function to generate circle packing
@@ -66,6 +70,9 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
     props.rendererOptions.rootColor,
     props.rendererOptions.leafColor
   )
+  // colorMapper = getColorMap('#FFFFFF', '#999999')
+  blueMapper = blueMap()
+  redMapper = redMap()
 
   tooltip = getTooltip()
   svg = getSvg(svgTree, w, h).style('background', '#FFFFFF')
@@ -80,8 +87,6 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
 
   currentNodes = nodes
   focus = root
-
-  console.log('@Calc packing:', performance.now() - t01)
 
   // Base setting.
   g = svg.append('g')
@@ -124,10 +129,7 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   circleNodes = g.selectAll('circle')
   labels = g.selectAll('.label')
 
-  const t04 = performance.now()
   expand(root)
-  console.log('* EXPAND time:', performance.now() - t04)
-
   console.log('D3 Initial layout total:', performance.now() - t0)
 }
 
@@ -243,9 +245,15 @@ const getLabelColor = d => {
   }
 }
 
-const buildData = d => {
+const buildData = (d)=> {
+
+  if(d=== root) {
+    return root.descendants().filter(node=>node.depth < expandDepth+1)
+  }
+
+
   let newNodes = root.descendants().filter(node => {
-    if (node.depth < 2) {
+    if (node.depth < expandDepth+1) {
       return true
     }
 
@@ -449,7 +457,14 @@ const addCircles = (container, data, newFocus) => {
     })
     .style('fill', function(d) {
       const data = d.data.data
+
+      if (data.props.BlueNodes) {
+        return blueMapper(d.depth)
+      } else if (data.props.RedNodes) {
+        return redMapper(d.depth)
+      }
       return colorMapper(d.depth)
+
       if (d.children) {
         return colorMapper(d.depth)
       } else {
@@ -459,6 +474,14 @@ const addCircles = (container, data, newFocus) => {
         return 'rgba(255, 255, 255, 0.8)'
       }
     })
+    // .style('fill-opacity', (d) => {
+    //   const data = d.data.data
+    //   if(data.props.BlueNodes || data.props.RedNodes) {
+    //     return 1
+    //   } else {
+    //     return 0.4
+    //   }
+    // })
     .attr('r', d => d.r)
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
@@ -652,6 +675,16 @@ export const fit = () => {
   svg.call(zoom2.transform, trans)
 
   zoom(root)
+}
+
+export const changeDepth = (depth) => {
+
+  expandDepth = depth
+  expand(root)
+  zoom(root)
+  if (d3Selection.event !== undefined && d3Selection.event !== null) {
+    d3Selection.event.stopPropagation()
+  }
 }
 
 /**
