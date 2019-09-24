@@ -52,6 +52,22 @@ let redMapper = null
 
 let expandDepth = 1
 
+
+
+const initializeColorMaps = (rootColor, leafColor) => {
+  colorMapper = getColorMap(
+    rootColor,
+    leafColor
+  )
+  // colorMapper = getColorMap('#FFFFFF', '#999999')
+
+  // Optional mappers
+  blueMapper = blueMap()
+  redMapper = redMap()
+
+}
+
+
 /**
  * Main function to generate circle packing
  *
@@ -65,14 +81,9 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   console.log('============ D3 CC start======================:')
 
   props = originalProps
-
-  colorMapper = getColorMap(
-    props.rendererOptions.rootColor,
-    props.rendererOptions.leafColor
-  )
-  // colorMapper = getColorMap('#FFFFFF', '#999999')
-  blueMapper = blueMap()
-  redMapper = redMap()
+  const leafColor = props.rendererOptions.leafColor
+  const rootColor = props.rendererOptions.rootColor
+  initializeColorMaps(rootColor, leafColor)
 
   tooltip = getTooltip()
   svg = getSvg(svgTree, w, h).style('background', '#FFFFFF')
@@ -680,6 +691,16 @@ export const fit = () => {
 export const changeDepth = (depth) => {
 
   expandDepth = depth
+  expand(root)
+  zoom(root)
+  if (d3Selection.event !== undefined && d3Selection.event !== null) {
+    d3Selection.event.stopPropagation()
+  }
+}
+
+export const changeColor = (rootColor, leafColor) => {
+
+  initializeColorMaps(rootColor, leafColor)
   expand(root)
   zoom(root)
   if (d3Selection.event !== undefined && d3Selection.event !== null) {

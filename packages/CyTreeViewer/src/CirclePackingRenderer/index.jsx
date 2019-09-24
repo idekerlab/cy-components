@@ -4,7 +4,8 @@ import CirclePacking, {
   highlightNode,
   fit,
   clear,
-  changeDepth
+  changeDepth,
+  changeColor
 } from './d3-circle-packing'
 
 /**
@@ -24,7 +25,6 @@ const CirclePackingRenderer = props => {
         props.height,
         props
       )
-      console.log('CP initialized!')
       setInitialized(true)
     }
   }, [])
@@ -47,9 +47,12 @@ const CirclePackingRenderer = props => {
   }, [props.highlight])
 
   useEffect(() => {
-    console.log('================ Given depth:::', props.depth)
     changeDepth(props.depth)
   }, [props.depth])
+
+  useEffect(() => {
+    changeColor(props.rendererOptions.rootColor, props.rendererOptions.leafColor)
+  }, [props.rendererOptions.leafColor, props.rendererOptions.rootColor])
 
 
   return <div ref={treeRef} />
