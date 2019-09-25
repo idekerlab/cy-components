@@ -219,8 +219,6 @@ class CytoscapeJsRenderer extends Component {
     const currentVs = this.props.networkStyle
 
     if (!newVs) {
-      console.log(newVs, currentVs)
-
       if (currentVs === null || currentVs === undefined) {
         this.state.cyjs.style(newVs.style)
       } else {
@@ -259,7 +257,6 @@ class CytoscapeJsRenderer extends Component {
   }
 
   runCommand = command => {
-    console.log('*** Command: ', command)
     // Execute Cytoscape command
     if (command === null) {
       return
@@ -409,10 +406,6 @@ class CytoscapeJsRenderer extends Component {
 
       cy.fit(target, 400)
     } else if (commandName === 'filter') {
-      console.log(
-        '------------ CyJS Filter called 000 ----------',
-        commandParams
-      )
       const options = commandParams.options
       const filterType = options.type
       const isPrimary = options.isPrimary
@@ -423,7 +416,6 @@ class CytoscapeJsRenderer extends Component {
         cy.startBatch()
 
         if (isPrimary) {
-          console.log('------------ CyJS Filter called ----------', options)
           // Before filtering, restore all original edges
           const hiddenEdges = this.state.hiddenEdges
           if (hiddenEdges !== undefined) {
@@ -481,14 +473,14 @@ class CytoscapeJsRenderer extends Component {
           / /g,
           '_'
         )
-        const newEdges = this.expandEdges(edgeType, cy.edges(), mainEdgeType)
+        const newEdges = this.expandEdges(edgeType, cy.edges(), mainEdgeType, edgeColor)
         if (newEdges.length !== 0) {
           const added = cy.add(newEdges)
           added.style({
-            'line-color': edgeColor,
             width: 3,
             opacity: 0.95
           })
+          // added.style('line-color', edgeColor)
           added.on('mouseover', evt => {
             const edge = evt.target
             edge.style('text-opacity', 1)
@@ -529,7 +521,7 @@ class CytoscapeJsRenderer extends Component {
   /*
     Using data type to add more edges to the primary one
    */
-  expandEdges = (edgeType, edges, primaryEdgeType = 'RF_score') => {
+  expandEdges = (edgeType, edges, primaryEdgeType = 'RF_score', edgeColor) => {
     let i = edges.length
     const newEdges = []
 
@@ -540,10 +532,10 @@ class CytoscapeJsRenderer extends Component {
         const newEdge = {
           data: {
             id: edge.data('id') + '-' + edgeType,
-            // id: Math.floor(Math.random() * 100000) + '-' + edgeType,
             source: edge.data('source'),
             target: edge.data('target'),
             interaction: edgeType,
+            color: edgeColor,
             zIndex: 0,
             [primaryEdgeType]: edge.data(primaryEdgeType),
             [edgeType]: edge.data(edgeType)
