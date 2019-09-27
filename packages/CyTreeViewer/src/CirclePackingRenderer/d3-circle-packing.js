@@ -1,7 +1,7 @@
 import * as d3Selection from 'd3-selection'
 import * as d3Zoom from 'd3-zoom'
 
-import getColorMap, {blueMap, redMap} from './colormap-generator'
+import getColorMap, { blueMap, redMap } from './colormap-generator'
 import getSvg from './svg-container-factory'
 import getTooltip from './tooltip-factory'
 import layoutTree from './layout-tree'
@@ -9,6 +9,7 @@ import layoutTree from './layout-tree'
 let colorMapper = null
 const MARGIN = 50
 const MAX_DEPTH = 3
+const ZOOM_TH_1 = 4.0
 
 // TODO: Manage these states in React way
 let currentDepth = 0
@@ -52,21 +53,20 @@ let redMapper = null
 
 let expandDepth = 1
 
+let trans = {}
 
+let lastHighlight = null
+
+const MIN_RADIUS = 4
+const DEF_SCALE_FACTOR = 1.0
 
 const initializeColorMaps = (rootColor, leafColor) => {
-  colorMapper = getColorMap(
-    rootColor,
-    leafColor
-  )
-  // colorMapper = getColorMap('#FFFFFF', '#999999')
+  colorMapper = getColorMap(rootColor, leafColor)
 
   // Optional mappers
   blueMapper = blueMap()
   redMapper = redMap()
-
 }
-
 
 /**
  * Main function to generate circle packing
@@ -102,9 +102,17 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   // Base setting.
   g = svg.append('g')
 
-  const t02 = performance.now()
   const zoomed2 = () => {
-    g.attr('transform', d3Selection.event.transform)
+    trans = d3Selection.event.transform
+
+    if (selectedGroups) {
+      if (trans.k > ZOOM_TH_1) {
+        selectedGroups.attr('r', d => d.r)
+      } else {
+        selectedGroups.attr('r', d => calcRadius(d))
+      }
+    }
+    g.attr('transform', trans)
   }
 
   zoom2 = d3Zoom
@@ -113,8 +121,6 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
     .on('zoom', zoomed2)
 
   svg.call(zoom2).on('dblclick.zoom', null)
-
-  console.log('* Zoom time:', performance.now() - t02)
 
   // Now label map is available.
   const labelSizes = [...labelSizeMap.values()]
@@ -228,12 +234,12 @@ const addLabels = (container, data, newFocus) => {
  * @returns {boolean}
  */
 const checkParents = (current, target) => {
-  if(current === target) {
+  if (current === target) {
     return true
   }
 
   const parent = current.parent
-  if(parent === undefined || parent === null) {
+  if (parent === undefined || parent === null) {
     return false
   }
 
@@ -256,17 +262,15 @@ const getLabelColor = d => {
   }
 }
 
-const buildData = (dOriginal)=> {
-
-
-  if(dOriginal === root) {
-    return root.descendants().filter(node=>node.depth < expandDepth+1)
+const buildData = dOriginal => {
+  if (dOriginal === root) {
+    return root.descendants().filter(node => node.depth < expandDepth + 1)
   }
 
   let d = dOriginal
 
   let newNodes = root.descendants().filter(node => {
-    if (node.depth < expandDepth+1) {
+    if (node.depth < expandDepth + 1) {
       return true
     }
 
@@ -487,14 +491,6 @@ const addCircles = (container, data, newFocus) => {
         return 'rgba(255, 255, 255, 0.8)'
       }
     })
-    // .style('fill-opacity', (d) => {
-    //   const data = d.data.data
-    //   if(data.props.BlueNodes || data.props.RedNodes) {
-    //     return 1
-    //   } else {
-    //     return 0.4
-    //   }
-    // })
     .attr('r', d => d.r)
     .attr('cx', d => d.x)
     .attr('cy', d => d.y)
@@ -563,7 +559,6 @@ const handleMouseOut = (d, props) => {
 }
 
 const showTooltip = (div, node) => {
-  // console.log('TP active:', node)
   const label = node.data.data.Label
   let parentNode = node.parent
 
@@ -615,26 +610,10 @@ export const selectNodes = (selected, fillColor = 'red') => {
 
   selectedGroups = d3Selection.selectAll(selectedCircles)
 
-  console.log('##Selected::2',selectedGroups)
-
-
   selectedGroups
     .style('fill', fillColor)
     .style('display', 'inline')
-    .attr('r', d => {
-      const radius = d.r
-      const parentRadius = d.parent.r
-      if (radius < 3) {
-
-        if(parentRadius < 3) {
-          return parentRadius
-        }
-
-        return 3
-      } else {
-        return radius
-      }
-    })
+    .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)))
 
   // Show labels
   const selectedLabels = selected
@@ -645,35 +624,40 @@ export const selectNodes = (selected, fillColor = 'red') => {
     )
   d3Selection
     .selectAll(selectedLabels)
-    .style('font-size', 9)
+    .style('font-size', d => labelSizeMap.get(d.data.id))
     .style('display', 'inline')
     .style('fill', '#FFFFFF')
 }
 
-let lastHighlight = null
+const calcRadius = (d, scaleFactor = DEF_SCALE_FACTOR) => {
+  const radius = d.r
+
+  if (radius < MIN_RADIUS) {
+    return MIN_RADIUS * scaleFactor
+  } else {
+    return radius * scaleFactor
+  }
+}
+
+const clearHighlight = (color = 'red') => {
+  if (lastHighlight) {
+    lastHighlight
+      .style('fill', color)
+      .style('display', 'inline')
+      .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)))
+  }
+}
 
 export const highlightNode = (selected, fillColor = 'yellow') => {
+  clearHighlight()
+
   if (selected === null || selected === undefined) {
+    // Null means no highlight is necessary
     return
   }
 
-  if (lastHighlight) {
-    lastHighlight
-      .style('fill', 'red')
-      .style('display', 'inline')
-      .attr('r', d => {
-        const radius = d.r
-        if (radius < 3) {
-          return 3
-        } else {
-          return radius
-        }
-      })
-  }
-
-
   let selectedCircle = '#c' + selected
-  if(selected instanceof Array) {
+  if (selected instanceof Array) {
     selectedCircle = selected.map(id => '#c' + id).join(',')
   }
 
@@ -686,28 +670,18 @@ export const highlightNode = (selected, fillColor = 'yellow') => {
   highlight
     .style('fill', fillColor)
     .style('display', 'inline')
-    .attr('r', d => {
-      const radius = d.r
-      if (radius < 3) {
-        return 4.5
-      } else {
-        return radius * 1.5
-      }
-    })
+    .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d, 2)))
   lastHighlight = highlight
 }
 
 export const fit = () => {
   currentDepth = MAX_DEPTH
   const trans = d3Zoom.zoomIdentity.translate(0, 0).scale(1)
-
   svg.call(zoom2.transform, trans)
-
   zoom(root)
 }
 
-export const changeDepth = (depth) => {
-
+export const changeDepth = depth => {
   expandDepth = depth
   expand(root)
   zoom(root)
@@ -717,7 +691,6 @@ export const changeDepth = (depth) => {
 }
 
 export const changeColor = (rootColor, leafColor) => {
-
   initializeColorMaps(rootColor, leafColor)
   expand(root)
   zoom(root)
@@ -727,39 +700,18 @@ export const changeColor = (rootColor, leafColor) => {
 }
 
 /**
- * Clear extra circles and hilights.
+ * Clear extra circles and highlights
  */
 export const clear = () => {
   if (selectedGroups === null) {
     return
   }
-
   selectedGroups
     .data([])
     .exit()
     .remove()
   selectedGroups = null
   searchResults = []
-
-  // selectedGroups.style('fill', function(d) {
-  //   const data = d.data.data
-  //
-  //   // This is a hidden node.
-  //   if (data.props.Hidden === true) {
-  //     if (data.NodeType !== 'Gene') {
-  //       return '#DDDDDD'
-  //     }
-  //   }
-  //
-  //   if (d.children) {
-  //     return colorMapper(d.depth)
-  //   } else {
-  //     if (data.NodeType !== 'Gene') {
-  //       return colorMapper(d.depth)
-  //     }
-  //     return 'rgba(255, 255, 255, 0.3)'
-  //   }
-  // })
 }
 
 export default CirclePacking

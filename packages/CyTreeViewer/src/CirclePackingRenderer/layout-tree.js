@@ -22,7 +22,6 @@ const layoutTree = (tree, diameter, margin) => {
       .hierarchy(tree)
       .sum(d => {
         const value = d.data.props.downstream_tips
-        // console.log(value)
         if (value !== undefined) {
           return value
         } else {
