@@ -256,12 +256,14 @@ const getLabelColor = d => {
   }
 }
 
-const buildData = (d)=> {
+const buildData = (dOriginal)=> {
 
-  if(d=== root) {
+
+  if(dOriginal === root) {
     return root.descendants().filter(node=>node.depth < expandDepth+1)
   }
 
+  let d = dOriginal
 
   let newNodes = root.descendants().filter(node => {
     if (node.depth < expandDepth+1) {
@@ -570,11 +572,13 @@ const showTooltip = (div, node) => {
     parent = parentNode.data.data.Label
   }
 
+  const text = label + '</br>(Child of ' + parent + ')'
+
   div.style('opacity', 0.9)
   div
     .html(
-      '<div style="font-size: 1.3em; padding-bottom: 0.5em; line-height: 1.1em; color: #222222">' +
-        label +
+      '<div style="font-size: 1em; padding-bottom: 0.5em; line-height: 1.1em; color: #222222">' +
+        text +
         '</div>'
     )
     .style('left', d3Selection.event.pageX + 30 + 'px')
@@ -611,13 +615,22 @@ export const selectNodes = (selected, fillColor = 'red') => {
 
   selectedGroups = d3Selection.selectAll(selectedCircles)
 
+  console.log('##Selected::2',selectedGroups)
+
+
   selectedGroups
     .style('fill', fillColor)
     .style('display', 'inline')
     .attr('r', d => {
       const radius = d.r
-      if (radius < 6) {
-        return 6
+      const parentRadius = d.parent.r
+      if (radius < 3) {
+
+        if(parentRadius < 3) {
+          return parentRadius
+        }
+
+        return 3
       } else {
         return radius
       }
@@ -650,15 +663,20 @@ export const highlightNode = (selected, fillColor = 'yellow') => {
       .style('display', 'inline')
       .attr('r', d => {
         const radius = d.r
-        if (radius < 6) {
-          return 6
+        if (radius < 3) {
+          return 3
         } else {
           return radius
         }
       })
   }
 
-  const selectedCircle = '#c' + selected
+
+  let selectedCircle = '#c' + selected
+  if(selected instanceof Array) {
+    selectedCircle = selected.map(id => '#c' + id).join(',')
+  }
+
   const highlight = d3Selection.selectAll(selectedCircle)
 
   if (!highlight) {
@@ -670,8 +688,8 @@ export const highlightNode = (selected, fillColor = 'yellow') => {
     .style('display', 'inline')
     .attr('r', d => {
       const radius = d.r
-      if (radius < 6) {
-        return 6
+      if (radius < 3) {
+        return 4.5
       } else {
         return radius * 1.5
       }

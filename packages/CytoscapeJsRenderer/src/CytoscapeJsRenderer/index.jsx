@@ -433,7 +433,6 @@ class CytoscapeJsRenderer extends Component {
 
           toBeRemoved.remove()
         } else {
-          console.log('======NON-primary')
           // Before filtering, restore all original edges
           const hiddenEdges = this.state[targetType]
           if (hiddenEdges !== undefined) {
