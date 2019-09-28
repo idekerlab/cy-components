@@ -178,7 +178,8 @@ const addLabels = (container, data, newFocus) => {
     .remove()
 
   // Size filter: do not show small labels
-  const filtered = data.filter(d => {
+
+  const filtered = root.children.filter(d => {
     const labelSize = getFontSize(d)
 
     if (
@@ -186,8 +187,7 @@ const addLabels = (container, data, newFocus) => {
       selectedSubsystem !== null &&
       d.parent === selectedSubsystem
     ) {
-      // console.log('parent and selected system = ', d.parent, selectedSubsystem)
-      if (d !== selectedSubsystem && labelSize > 0.6) {
+      if (d !== selectedSubsystem && labelSize > 3) {
         return true
       } else if (d.parent === selectedSubsystem) {
         return true
@@ -210,6 +210,49 @@ const addLabels = (container, data, newFocus) => {
 
     return false
   })
+
+
+  // Add direct children
+  const children = selectedSubsystem.children
+
+  if (children !== undefined) {
+    const numChildren = children.length
+    children.forEach(child => {
+      if (child.height !== 0) {
+        filtered.push(child)
+      } else if (numChildren < 100) {
+        filtered.push(child)
+      }
+    })
+    // const parent = selectedSubsystem.parent
+    // if (parent !== undefined && parent !== null) {
+    //   const children = parent.children
+    //   children.forEach(child => {
+    //     if (child !== selectedSubsystem && child !== parent) {
+    //       if (child.height !== 0) {
+    //         filtered.push(child)
+    //       } else if (numChildren < 100) {
+    //         filtered.push(child)
+    //       }
+    //     }
+    //   })
+    // }
+  } else {
+    // Leaf node
+    const parent = selectedSubsystem.parent
+    if (parent !== undefined) {
+      const children = parent.children
+      children.forEach(child => {
+        if (child !== selectedSubsystem && child !== parent) {
+          filtered.push(child)
+        }
+      })
+    }
+  }
+  if (selectedSubsystem.height === 0) {
+    filtered.push(selectedSubsystem)
+  }
+
   const currentLabels = container.selectAll('text').data(filtered)
 
   return currentLabels
@@ -269,46 +312,53 @@ const buildData = dOriginal => {
 
   let d = dOriginal
 
-  let newNodes = root.descendants().filter(node => {
-    if (node.depth < expandDepth + 1) {
+  // Filter higher level terms
+  //    - Add only to the specified depth
+  let newNodes = root.descendants().filter(child => {
+    if (child.depth < expandDepth + 1) {
       return true
     }
-
-    if (node.parent !== null && d.parent !== null) {
-      if (d.parent === node.parent) {
+    if (child.parent !== null && d.parent !== null) {
+      if (d.parent === child.parent) {
         return true
       }
-
-      if (node === d.parent) {
+      if (child === d.parent) {
         return true
       }
     }
-
     return false
   })
+
+  if (d.children === undefined) {
+    // Special case: leaf nodes (no children)
+    // For these, add parent and grand parent
+    const parent = d.parent
+    const grandParent = parent.parent
+    if (grandParent !== undefined && grandParent !== null) {
+      newNodes.push(grandParent)
+      grandParent.children.forEach(child => newNodes.push(child))
+    }
+    newNodes.push(parent)
+
+    // Add subsystems in the same group
+    parent.children.forEach(child => newNodes.push(child))
+  }
+  // Add self
   newNodes.push(d)
 
+  // Add all direct children
   if (d.children !== undefined) {
     d.children.forEach(child => {
       newNodes.push(child)
     })
   }
 
-  // if (d.parent !== null && d.parent.parent !== null) {
-  //   d.parent.parent.children.forEach(child => {
-  //     newNodes.push(child)
-  //   })
-  // }
-
   return newNodes
 }
 
 const expand = (d, i, nodes) => {
   selectedSubsystem = d
-
-  console.log('*** Expand start ***', d)
   const t002 = performance.now()
-
   const newNodes = buildData(d)
 
   console.log('* build data rime:', performance.now() - t002)
