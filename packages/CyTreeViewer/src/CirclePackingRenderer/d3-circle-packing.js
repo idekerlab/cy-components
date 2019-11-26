@@ -361,8 +361,6 @@ const expand = (d, i, nodes) => {
   const t002 = performance.now()
   const newNodes = buildData(d)
 
-  console.log('* build data rime:', performance.now() - t002)
-
   addCircles(g, newNodes, d)
   addLabels(g, newNodes, d)
 
@@ -556,11 +554,11 @@ const selectCurrentNodes = (nodes, type) => {
 const zoom = d => {
   // Update current focus
   focus = d
-  if (d !== root) {
+  // if (d !== root) {
     setTimeout(() => {
       props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
     }, 2)
-  }
+  // }
 }
 
 const zoomTo = v => {
