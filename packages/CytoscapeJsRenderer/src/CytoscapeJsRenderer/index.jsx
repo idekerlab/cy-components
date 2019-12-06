@@ -46,6 +46,8 @@ class CytoscapeJsRenderer extends Component {
 
     this.setState({ networkData: network.data })
 
+    cy.minZoom(0.05)
+    cy.maxZoom(50)
     cy.startBatch()
 
     cy.remove(cy.elements('node'))
