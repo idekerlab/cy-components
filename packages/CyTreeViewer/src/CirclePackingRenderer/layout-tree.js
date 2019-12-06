@@ -9,28 +9,18 @@ import * as d3Hierarchy from 'd3-hierarchy'
  * @returns {*}
  */
 const layoutTree = (tree, diameter, margin) => {
-  // const root = getRoot(tree)
-
-  // Get all children
+  const newTree = d3Hierarchy
+    .hierarchy(tree)
+    .count()
+    .sort(function(a, b) {
+      return b.value - a.value
+    })
 
   const size = diameter - margin
   return d3Hierarchy
     .pack()
     .size([size, size])
-    .padding(1)(
-    d3Hierarchy
-      .hierarchy(tree)
-      .sum(d => {
-        const value = d.data.props.downstream_tips
-        if (value !== undefined) {
-          return value
-        } else {
-          return 1
-        }
-      })
-      .sort((a, b) => b.value - a.value)
-  )
+    .padding(0.1)(newTree)
 }
-
 
 export default layoutTree

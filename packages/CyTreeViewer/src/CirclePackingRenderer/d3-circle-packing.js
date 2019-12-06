@@ -78,8 +78,6 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   }
 
   const t0 = performance.now()
-  console.log('============ D3 CC start======================:')
-
   props = originalProps
   const leafColor = props.rendererOptions.leafColor
   const rootColor = props.rendererOptions.rootColor
@@ -93,6 +91,7 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   const t01 = performance.now()
 
   root = layoutTree(tree, diameter, MARGIN)
+
   let nodes = root.children
   nodeCount = nodes.length
 
@@ -210,7 +209,6 @@ const addLabels = (container, data, newFocus) => {
 
     return false
   })
-
 
   // Add direct children
   const children = selectedSubsystem.children
@@ -369,8 +367,6 @@ const expand = (d, i, nodes) => {
   //   v.classed('node-selected-sub', false)
   // })
   // subSelected.clear()
-
-  console.log('* AddLabel and circle:', performance.now() - t002)
 
   if (focus !== d || !focus.parent) {
     zoom(d)
@@ -554,11 +550,9 @@ const selectCurrentNodes = (nodes, type) => {
 const zoom = d => {
   // Update current focus
   focus = d
-  // if (d !== root) {
-    setTimeout(() => {
-      props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
-    }, 2)
-  // }
+  setTimeout(() => {
+    props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
+  }, 2)
 }
 
 const zoomTo = v => {
@@ -573,20 +567,10 @@ const zoomTo = v => {
   circle.attr('r', d => d.r * k)
 }
 
-let running = false
 const handleMouseOver = (d, i, nodes, props) => {
   const parent = d.parent
-
   if (parent === selectedSubsystem) {
-    setTimeout(() => {
-      if (running) {
-        return
-      } else {
-        running = true
-        props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent)
-        running = false
-      }
-    }, 2)
+    props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent)
   }
 }
 
@@ -594,15 +578,7 @@ const handleMouseOut = (d, props) => {
   const parent = d.parent
 
   if (parent === selectedSubsystem) {
-    setTimeout(() => {
-      if (running) {
-        return
-      } else {
-        running = true
-        props.eventHandlers.hoverOutNode(d.data.id, d.data.data.props)
-        running = false
-      }
-    }, 2)
+    props.eventHandlers.hoverOutNode(d.data.id, d.data.data.props)
   }
 }
 

@@ -129,37 +129,47 @@ class CytoscapeJsRenderer extends Component {
     const cy = this.state.cyjs
     cy.off(config.SUPPORTED_EVENTS)
 
-    try {
-      cy.startBatch()
-      cy.nodes().removeStyle()
-      cy.endBatch()
+    const t0 = performance.now()
 
+    try {
       const idList = selected.nodes
       if (!idList) {
         return
       }
 
       const elements = cy.elements()
-      elements.unselect()
-
-      const idListPermanent = [...selected.nodesPerm]
-
-      // Styling for permanent selection
-      if (idListPermanent && idListPermanent.length !== 0) {
+      if(idList.length === 0) {
         cy.startBatch()
-        const permSelected = idListPermanent.map(id => '#' + id)
-        const permSelectedStr = permSelected.toString()
-        const permanentNodes = cy.elements(permSelectedStr)
-
-        permanentNodes.style({
-          'background-color': 'green'
-        })
-        permanentNodes.select()
-
+        elements.removeClass('hidden')
+        elements.removeClass('seed')
+        cy.nodes().removeStyle()
+        elements.unselect()
         cy.endBatch()
+        return
       }
 
       cy.startBatch()
+      cy.nodes().removeStyle()
+      elements.unselect()
+      // console.log('Unselect done. ', performance.now() - t0)
+
+      // const idListPermanent = [...selected.nodesPerm]
+
+      // Styling for permanent selection
+      // if (idListPermanent && idListPermanent.length !== 0) {
+      //   cy.startBatch()
+      //   const permSelected = idListPermanent.map(id => '#' + id)
+      //   const permSelectedStr = permSelected.toString()
+      //   const permanentNodes = cy.elements(permSelectedStr)
+      //
+      //   permanentNodes.style({
+      //     'background-color': 'green'
+      //   })
+      //   permanentNodes.select()
+      //
+      //   cy.endBatch()
+      // }
+
       if (!idList || idList.length === 0) {
         elements.removeClass('hidden')
         elements.removeClass('seed')
@@ -167,7 +177,9 @@ class CytoscapeJsRenderer extends Component {
         const selected2 = idList.map(id => '#' + id)
         const strVal = selected2.toString()
         const targets = cy.elements(strVal)
+
         if (targets) {
+          const t2 = performance.now()
           // Fade all nodes and edges first.
           const connectingEdges = targets.connectedEdges()
           const allNodes = connectingEdges.connectedNodes()
@@ -175,6 +187,7 @@ class CytoscapeJsRenderer extends Component {
           const toBeRemoved = diff.left.edgesWith(targets)
           const edgeDiff = connectingEdges.diff(toBeRemoved)
           const internalEdges = edgeDiff.left
+          console.log('Edge filter selection: ', performance.now() - t2)
 
           if (internalEdges) {
             elements.addClass('hidden')
@@ -184,6 +197,7 @@ class CytoscapeJsRenderer extends Component {
         }
       }
       cy.endBatch()
+
     } catch (ex) {
       console.warn('WNG')
     }
@@ -204,7 +218,10 @@ class CytoscapeJsRenderer extends Component {
       return
     }
 
-    if (nextProps.selected !== this.props.selected) {
+
+    const currentSelection = this.props.selected
+    const nextSelection = nextProps.selected
+    if (currentSelection.nodes !== nextSelection.nodes) {
       this.select(nextProps.selected)
     }
 
