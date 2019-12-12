@@ -584,14 +584,18 @@ const handleMouseOut = (d, props) => {
 
 const showTooltip = (div, node) => {
   const label = node.data.data.Label
+  const name = node.data.data.props.name
   let parentNode = node.parent
 
-  let parent = 'N/A'
+  let parent = null
   if (parentNode) {
     parent = parentNode.data.data.Label
   }
 
-  const text = label + '</br>(Child of ' + parent + ')'
+  let text = name + '</br><strong>' + label + '</strong>'
+  if (parent !== null) {
+    text = text + '</br>(Child of ' + parent + ')'
+  }
 
   div.style('opacity', 0.9)
   div
