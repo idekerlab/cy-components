@@ -91,6 +91,7 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   const t01 = performance.now()
 
   root = layoutTree(tree, diameter, MARGIN)
+  props.setHierarchy(root)
 
   let nodes = root.children
   nodeCount = nodes.length
@@ -550,9 +551,9 @@ const selectCurrentNodes = (nodes, type) => {
 const zoom = d => {
   // Update current focus
   focus = d
-  setTimeout(() => {
-    props.eventHandlers.selectNode(d.data.id, d.data.data.props, true)
-  }, 2)
+
+  console.log('Zoom called*************', d)
+  props.eventHandlers.selectNode(d.data.id, d.data.data.props, true, d)
 }
 
 const zoomTo = v => {

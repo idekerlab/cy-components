@@ -220,7 +220,6 @@ class CytoscapeJsRenderer extends Component {
       return
     }
 
-
     const currentSelection = this.props.selected
     const nextSelection = nextProps.selected
     if (currentSelection.nodes !== nextSelection.nodes) {

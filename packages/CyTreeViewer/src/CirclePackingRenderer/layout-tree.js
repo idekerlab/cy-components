@@ -12,7 +12,7 @@ const layoutTree = (tree, diameter, margin) => {
   const newTree = d3Hierarchy
     .hierarchy(tree)
     .count()
-    .sort(function(a, b) {
+    .sort((a, b) => {
       return b.value - a.value
     })
 
@@ -21,6 +21,11 @@ const layoutTree = (tree, diameter, margin) => {
     .pack()
     .size([size, size])
     .padding(0.1)(newTree)
+}
+
+
+const getScore = tree => {
+
 }
 
 export default layoutTree
