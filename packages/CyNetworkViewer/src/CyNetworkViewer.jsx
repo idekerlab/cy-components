@@ -60,6 +60,10 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
     console.log('deselectEdges called.')
   },
 
+  hideEdges: (edgeIds) => {
+    console.log('hideEdges called', edgeIds)
+  },
+
   /**
    * Position of nodes are changed by user actions
    * (usually done by mouse drag)

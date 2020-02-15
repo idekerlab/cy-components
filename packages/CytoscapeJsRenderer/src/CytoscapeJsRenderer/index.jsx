@@ -44,7 +44,9 @@ class CytoscapeJsRenderer extends Component {
       cy = cyjs
     }
 
+
     this.setState({ networkData: network.data })
+
 
     cy.minZoom(0.001)
     cy.maxZoom(40)
@@ -64,6 +66,8 @@ class CytoscapeJsRenderer extends Component {
         const edge = evt.target
         edge.style('text-opacity', 0)
       })
+
+    this.setPrimaryEdgeStatus(this.hidePrimary)
 
     cy.endBatch()
 
@@ -206,6 +210,22 @@ class CytoscapeJsRenderer extends Component {
     cy.on(config.SUPPORTED_EVENTS, this.cyEventHandler)
   }
 
+
+  hidePrimaryEdges = () => {
+    this.state.cyjs.edges('[!subEdge]').addClass('hidden')
+  }
+  showPrimaryEdges = () => {
+    this.state.cyjs.edges('[!subEdge]').removeClass('hidden')
+  }
+
+  setPrimaryEdgeStatus = (hidePrimary) => {
+    if(hidePrimary) {
+      this.hidePrimaryEdges()
+    } else {
+      this.showPrimaryEdges()
+    }
+  }
+
   /**
    * This is the main function to determine
    * whether update is necessary or not.
@@ -219,6 +239,11 @@ class CytoscapeJsRenderer extends Component {
     if (!nextProps.network) {
       return
     }
+
+    const hidePrimary = nextProps.hidePrimary
+    console.log('CYJS update = ', hidePrimary)
+
+    this.setPrimaryEdgeStatus(hidePrimary)
 
     const currentSelection = this.props.selected
     const nextSelection = nextProps.selected
@@ -450,6 +475,11 @@ class CytoscapeJsRenderer extends Component {
           })
 
           toBeRemoved.remove()
+          if(this.props.hidePrimary) {
+            console.log('**Hiding edge = ', this.props.hidePrimary)
+            cy.edges().addClass('hidden')
+
+          }
         } else {
           // Before filtering, restore all original edges
           const hiddenEdges = this.state[targetType]
@@ -554,6 +584,7 @@ class CytoscapeJsRenderer extends Component {
             interaction: edgeType,
             color: edgeColor,
             zIndex: 0,
+            subEdge: true,
             [primaryEdgeType]: edge.data(primaryEdgeType),
             [edgeType]: edge.data(edgeType)
           }
