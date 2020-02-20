@@ -193,7 +193,6 @@ class CytoscapeJsRenderer extends Component {
           const toBeRemoved = diff.left.edgesWith(targets)
           const edgeDiff = connectingEdges.diff(toBeRemoved)
           const internalEdges = edgeDiff.left
-          console.log('Edge filter selection: ', performance.now() - t2)
 
           if (internalEdges) {
             elements.addClass('hidden')
@@ -241,8 +240,6 @@ class CytoscapeJsRenderer extends Component {
     }
 
     const hidePrimary = nextProps.hidePrimary
-    console.log('CYJS update = ', hidePrimary)
-
     this.setPrimaryEdgeStatus(hidePrimary)
 
     const currentSelection = this.props.selected
