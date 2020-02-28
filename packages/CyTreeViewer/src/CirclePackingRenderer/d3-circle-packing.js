@@ -621,13 +621,13 @@ let selectedGroups = null
  * @param selected
  * @param fillColor
  */
-export const selectNodes = (selected, fillColor = 'red') => {
-  if (selected === null || selected === undefined || selected.length === 0) {
+export const selectNodes = (id2color, fillColor = 'red') => {
+  if (id2color === null || id2color === undefined || id2color.size === 0) {
     return
   }
 
+  const selected = Array.from(id2color.keys())
   searchResults = selected
-
   const selectedCircles = selected
     .map(id => '#c' + id)
     .reduce(
@@ -640,7 +640,7 @@ export const selectNodes = (selected, fillColor = 'red') => {
   selectedGroups = d3Selection.selectAll(selectedCircles)
 
   selectedGroups
-    .style('fill', fillColor)
+    .style('fill', d => id2color.get(d.data.id))
     .style('display', 'inline')
     .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)))
 
@@ -679,7 +679,6 @@ const clearHighlight = (color = 'red') => {
 
 export const highlightNode = (selected, fillColor = 'yellow') => {
   clearHighlight()
-
   if (selected === null || selected === undefined) {
     // Null means no highlight is necessary
     return
