@@ -551,8 +551,6 @@ const selectCurrentNodes = (nodes, type) => {
 const zoom = d => {
   // Update current focus
   focus = d
-
-  console.log('Zoom called*************', d)
   props.eventHandlers.selectNode(d.data.id, d.data.data.props, true, d)
 }
 
@@ -668,17 +666,19 @@ const calcRadius = (d, scaleFactor = DEF_SCALE_FACTOR) => {
   }
 }
 
-const clearHighlight = (color = 'red') => {
+const clearHighlight = id2color => {
   if (lastHighlight) {
     lastHighlight
-      .style('fill', color)
+      .style('fill', d => id2color.get(d.data.id))
       .style('display', 'inline')
       .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)))
   }
 }
 
-export const highlightNode = (selected, fillColor = 'yellow') => {
-  clearHighlight()
+export const highlightNode = (selected, id2color) => {
+  // Set back to original selected color
+  clearHighlight(id2color)
+
   if (selected === null || selected === undefined) {
     // Null means no highlight is necessary
     return
@@ -696,7 +696,7 @@ export const highlightNode = (selected, fillColor = 'yellow') => {
   }
 
   highlight
-    .style('fill', fillColor)
+    .style('fill', d => id2color.get(d.data.id))
     .style('display', 'inline')
     .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d, 2)))
   lastHighlight = highlight

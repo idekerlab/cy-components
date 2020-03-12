@@ -39,13 +39,11 @@ const CirclePackingRenderer = props => {
   }, [props.command])
 
   useEffect(() => {
-    console.log('select====================', props.selected)
     selectNodes(props.selected)
   }, [props.selected])
 
   useEffect(() => {
-    console.log('HL========================', props.highlight)
-    highlightNode(props.highlight)
+    highlightNode(props.highlight, props.selected)
   }, [props.highlight])
 
   useEffect(() => {
