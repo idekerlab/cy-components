@@ -223,19 +223,6 @@ const addLabels = (container, data, newFocus) => {
         filtered.push(child)
       }
     })
-    // const parent = selectedSubsystem.parent
-    // if (parent !== undefined && parent !== null) {
-    //   const children = parent.children
-    //   children.forEach(child => {
-    //     if (child !== selectedSubsystem && child !== parent) {
-    //       if (child.height !== 0) {
-    //         filtered.push(child)
-    //       } else if (numChildren < 100) {
-    //         filtered.push(child)
-    //       }
-    //     }
-    //   })
-    // }
   } else {
     // Leaf node
     const parent = selectedSubsystem.parent
@@ -304,12 +291,31 @@ const getLabelColor = d => {
   }
 }
 
+const getPath = (node, path = []) => {
+  const parent = node.parent
+  if (parent !== root) {
+    path.push(parent)
+    return getPath(parent)
+  } else {
+    return path
+  }
+}
+
 const buildData = dOriginal => {
   if (dOriginal === root) {
     return root.descendants().filter(node => node.depth < expandDepth + 1)
   }
 
   let d = dOriginal
+
+  let nextP = d.parent
+  const pList = []
+  const parents = new Set()
+  while (nextP !== undefined && nextP !== root) {
+    parents.add(nextP)
+    pList.push(nextP)
+    nextP = nextP.parent
+  }
 
   // Filter higher level terms
   //    - Add only to the specified depth
@@ -325,25 +331,21 @@ const buildData = dOriginal => {
         return true
       }
     }
+
+    if (parents.has(child)) {
+      return true
+    }
     return false
   })
 
-  if (d.children === undefined) {
-    // Special case: leaf nodes (no children)
-    // For these, add parent and grand parent
-    const parent = d.parent
-    const grandParent = parent.parent
-    if (grandParent !== undefined && grandParent !== null) {
-      newNodes.push(grandParent)
-      grandParent.children.forEach(child => newNodes.push(child))
+  const rList = pList.reverse()
+  rList.forEach(p => {
+    if (p.children !== undefined) {
+      p.children.forEach(child => {
+        newNodes.push(child)
+      })
     }
-    newNodes.push(parent)
-
-    // Add subsystems in the same group
-    parent.children.forEach(child => newNodes.push(child))
-  }
-  // Add self
-  newNodes.push(d)
+  })
 
   // Add all direct children
   if (d.children !== undefined) {
@@ -355,19 +357,14 @@ const buildData = dOriginal => {
   return newNodes
 }
 
-const expand = (d, i, nodes) => {
-  selectedSubsystem = d
-  const t002 = performance.now()
+const expand = (d, setCurrent = true) => {
+  if (setCurrent) {
+    selectedSubsystem = d
+  }
   const newNodes = buildData(d)
 
   addCircles(g, newNodes, d)
   addLabels(g, newNodes, d)
-
-  // Reset sub-selection
-  // subSelected.forEach(v => {
-  //   v.classed('node-selected-sub', false)
-  // })
-  // subSelected.clear()
 
   if (focus !== d || !focus.parent) {
     zoom(d)
@@ -378,28 +375,9 @@ const expand = (d, i, nodes) => {
 }
 
 const expandSearchResult = results => {
-  // let newNodes = root.descendants()
-  const newNodes = addSearchResults(results, root)
-  // newNodes = newNodes.concat(extra)
-
+  const newNodes = addSearchResults(results)
   addCircles(g, newNodes, root)
   addLabels(g, newNodes, root)
-
-  //////////////////TEST TODO: remove this
-  // paintSelectedNodes(selectedGroups)
-
-  // Reset sub-selection
-  // subSelected.forEach(v => {
-  //   v.classed('node-selected-sub', false)
-  // })
-  // subSelected.clear()
-
-  // if (focus !== d || !focus.parent) {
-  //   zoom(selectedSubsystem)
-  //   if (d3Selection.event !== undefined && d3Selection.event !== null) {
-  //     d3Selection.event.stopPropagation()
-  //   }
-  // }
 }
 
 const addSearchResults = results => {
@@ -430,7 +408,6 @@ const addSearchResults = results => {
     const node = allNodes[idx]
     const nodeId = node.data.data.id
     if (selectedSet.has(nodeId)) {
-      // console.log('Found:', nodeId)
       newNodes.push(node)
     }
   }
@@ -619,7 +596,7 @@ let selectedGroups = null
  * @param selected
  * @param fillColor
  */
-export const selectNodes = (id2color, fillColor = 'red') => {
+export const selectNodes = id2color => {
   if (id2color === null || id2color === undefined || id2color.size === 0) {
     return
   }
@@ -632,11 +609,10 @@ export const selectNodes = (id2color, fillColor = 'red') => {
       (previousValue, currentValue, index, array) =>
         previousValue + ', ' + currentValue
     )
-
-  expandSearchResult(selected)
+  // expandSearchResult(selected)
+  changeDepth(5)
 
   selectedGroups = d3Selection.selectAll(selectedCircles)
-
   selectedGroups
     .style('fill', d => id2color.get(d.data.id))
     .style('display', 'inline')
@@ -711,8 +687,8 @@ export const fit = () => {
 
 export const changeDepth = depth => {
   expandDepth = depth
-  expand(root)
-  zoom(root)
+  expand(root, false)
+  // zoom(root)
   if (d3Selection.event !== undefined && d3Selection.event !== null) {
     d3Selection.event.stopPropagation()
   }

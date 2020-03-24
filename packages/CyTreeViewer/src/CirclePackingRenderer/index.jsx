@@ -39,6 +39,9 @@ const CirclePackingRenderer = props => {
   }, [props.command])
 
   useEffect(() => {
+    console.log(
+      '###!!!!!!!!!!!!!!!----------------------------------EXP 5222222222222222'
+    )
     selectNodes(props.selected)
   }, [props.selected])
 
@@ -51,9 +54,11 @@ const CirclePackingRenderer = props => {
   }, [props.depth])
 
   useEffect(() => {
-    changeColor(props.rendererOptions.rootColor, props.rendererOptions.leafColor)
+    changeColor(
+      props.rendererOptions.rootColor,
+      props.rendererOptions.leafColor
+    )
   }, [props.rendererOptions.leafColor, props.rendererOptions.rootColor])
-
 
   return <div ref={treeRef} />
 }
