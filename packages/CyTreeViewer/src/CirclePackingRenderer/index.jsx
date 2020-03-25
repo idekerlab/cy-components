@@ -40,7 +40,7 @@ const CirclePackingRenderer = props => {
 
   useEffect(() => {
     console.log(
-      '###!!!!!!!!!!!!!!!----------------------------------EXP 5222222222222222'
+      '----------------------------------Search result given -----------------------'
     )
     selectNodes(props.selected)
   }, [props.selected])

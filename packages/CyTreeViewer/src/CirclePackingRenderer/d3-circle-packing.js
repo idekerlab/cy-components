@@ -60,6 +60,11 @@ let lastHighlight = null
 const MIN_RADIUS = 4
 const DEF_SCALE_FACTOR = 1.0
 
+let lastDepth = 1
+
+let lastRootColor = '#CCCCCC'
+let lastLeafColor = '#FFFFFF'
+
 const initializeColorMaps = (rootColor, leafColor) => {
   colorMapper = getColorMap(rootColor, leafColor)
 
@@ -81,6 +86,9 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   props = originalProps
   const leafColor = props.rendererOptions.leafColor
   const rootColor = props.rendererOptions.rootColor
+  lastRootColor = rootColor
+  lastLeafColor = leafColor
+
   initializeColorMaps(rootColor, leafColor)
 
   tooltip = getTooltip()
@@ -291,16 +299,6 @@ const getLabelColor = d => {
   }
 }
 
-const getPath = (node, path = []) => {
-  const parent = node.parent
-  if (parent !== root) {
-    path.push(parent)
-    return getPath(parent)
-  } else {
-    return path
-  }
-}
-
 const buildData = dOriginal => {
   if (dOriginal === root) {
     return root.descendants().filter(node => node.depth < expandDepth + 1)
@@ -357,10 +355,8 @@ const buildData = dOriginal => {
   return newNodes
 }
 
-const expand = (d, setCurrent = true) => {
-  if (setCurrent) {
-    selectedSubsystem = d
-  }
+const expand = d => {
+  selectedSubsystem = d
   const newNodes = buildData(d)
 
   addCircles(g, newNodes, d)
@@ -372,6 +368,8 @@ const expand = (d, setCurrent = true) => {
       d3Selection.event.stopPropagation()
     }
   }
+
+  restoreHighlight()
 }
 
 const expandSearchResult = results => {
@@ -380,28 +378,73 @@ const expandSearchResult = results => {
   addLabels(g, newNodes, root)
 }
 
+const getParents = node => {
+  let nextP = node.parent
+  const pList = []
+  while (nextP !== undefined && nextP !== root) {
+    pList.push(nextP)
+    nextP = nextP.parent
+  }
+  return pList
+}
+
+// Expand
 const addSearchResults = results => {
   const selectedSet = new Set(results)
 
   const allNodes = root.descendants()
   let idx = allNodes.length
   let newNodes = []
+
+  // 1. Add root (base circle)
   newNodes.push(root)
+
+  // 2. Add depth 1 nodes
+  const selectedParents = []
 
   while (idx--) {
     const node = allNodes[idx]
+    const nodeId = node.data.data.id
+
     if (node.depth === 1) {
       newNodes.push(node)
     }
+
+    if (selectedSet.has(nodeId)) {
+      // This is one of the selected node
+      const parents = getParents(node)
+      const rList = parents.reverse()
+      parents.forEach(p => {
+        newNodes.push(p)
+        if (p.children !== undefined) {
+          p.children.forEach(child => {
+            newNodes.push(child)
+          })
+        }
+      })
+
+      // selectedParents.push(parents)
+    }
   }
 
-  // Add selected ones
-  newNodes.push(selectedSubsystem)
-  if (selectedSubsystem.children !== undefined) {
-    selectedSubsystem.children.forEach(child => {
-      newNodes.push(child)
-    })
-  }
+  // 3. Add all parents of selected nodes
+  // selectedParents.forEach(parents => {
+  //   const rList = parents.reverse()
+  //   rList.forEach(p => {
+  //     if (p.depth !== 1) {
+  //       newNodes.push(p)
+  //       console.log('Addig parents!!!', p)
+  //     }
+  //   })
+  // })
+
+  // 4. Add current selected nodes
+  // newNodes.push(selectedSubsystem)
+  // if (selectedSubsystem.children !== undefined) {
+  //   selectedSubsystem.children.forEach(child => {
+  //     newNodes.push(child)
+  //   })
+  // }
 
   idx = allNodes.length
   while (idx--) {
@@ -589,7 +632,7 @@ const hideTooltip = div => {
 }
 
 let selectedGroups = null
-
+let highlightMap = null
 /**
  * Show selection by changing color and size
  *
@@ -597,7 +640,12 @@ let selectedGroups = null
  * @param fillColor
  */
 export const selectNodes = id2color => {
-  if (id2color === null || id2color === undefined || id2color.size === 0) {
+  if (
+    id2color === null ||
+    id2color === undefined ||
+    id2color.size === 0 ||
+    id2color.get === undefined
+  ) {
     return
   }
 
@@ -609,9 +657,10 @@ export const selectNodes = id2color => {
       (previousValue, currentValue, index, array) =>
         previousValue + ', ' + currentValue
     )
-  // expandSearchResult(selected)
-  changeDepth(5)
 
+  lastDepth = expandDepth
+  expandDepth = 6
+  expand(selectedSubsystem)
   selectedGroups = d3Selection.selectAll(selectedCircles)
   selectedGroups
     .style('fill', d => id2color.get(d.data.id))
@@ -630,6 +679,8 @@ export const selectNodes = id2color => {
     .style('font-size', d => labelSizeMap.get(d.data.id))
     .style('display', 'inline')
     .style('fill', '#FFFFFF')
+
+  highlightMap = id2color
 }
 
 const calcRadius = (d, scaleFactor = DEF_SCALE_FACTOR) => {
@@ -687,8 +738,8 @@ export const fit = () => {
 
 export const changeDepth = depth => {
   expandDepth = depth
-  expand(root, false)
-  // zoom(root)
+  expand(root)
+  zoom(root)
   if (d3Selection.event !== undefined && d3Selection.event !== null) {
     d3Selection.event.stopPropagation()
   }
@@ -701,6 +752,26 @@ export const changeColor = (rootColor, leafColor) => {
   if (d3Selection.event !== undefined && d3Selection.event !== null) {
     d3Selection.event.stopPropagation()
   }
+}
+
+const restoreHighlight = () => {
+  if (highlightMap === null || highlightMap === undefined) {
+    return
+  }
+
+  const selected = Array.from(highlightMap.keys())
+  const selectedCircles = selected
+    .map(id => '#c' + id)
+    .reduce(
+      (previousValue, currentValue, index, array) =>
+        previousValue + ', ' + currentValue
+    )
+
+  const searchResultNodes = d3Selection.selectAll(selectedCircles)
+  searchResultNodes
+    .style('fill', d => highlightMap.get(d.data.id))
+    .style('display', 'inline')
+    .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)))
 }
 
 /**
@@ -716,6 +787,8 @@ export const clear = () => {
     .remove()
   selectedGroups = null
   searchResults = []
+  highlightMap = null
+  changeDepth(1)
 }
 
 export default CirclePacking
