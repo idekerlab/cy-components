@@ -10,6 +10,34 @@ regCose(cytoscape);
 
 let t00 = 0;
 
+const MINIMAL_STYLE = [
+  {
+    selector: "edge",
+    style: {
+      "line-color": "data(color)"
+    },
+  },
+  {
+    selector: "node",
+    style: {
+      "background-color": "#FFFFFF",
+      "background-opacity": 0.2,
+      label: "data(name)"
+
+    },
+
+  },
+  {
+    selector: "node:selected",
+    style: {
+      "background-color": "#FF0000",
+      "background-opacity": 1
+
+    },
+
+  },
+];
+
 /**
  * Renderer using Cytoscape.js
  */
@@ -22,6 +50,7 @@ class CytoscapeJsRenderer extends Component {
       rendered: false,
       currentLayout: null,
       networkData: null,
+      visualStyle: null,
     };
   }
 
@@ -50,11 +79,10 @@ class CytoscapeJsRenderer extends Component {
     cy.minZoom(0.001);
     cy.maxZoom(40);
 
-    // cy.remove(cy.elements('node'))
-    // cy.remove(cy.elements('edge'))
+    cy.removeAllListeners();
 
-    cy.startBatch()
     const nodes = network.elements.nodes;
+    const nodeCount = nodes.length
     cy.add(nodes);
 
     // Apply optional filter if available
@@ -74,12 +102,6 @@ class CytoscapeJsRenderer extends Component {
     }
 
     setTimeout(() => {
-      cy.endBatch();
-      console.log("%%%%%%%%%%%%%%CYJS B back33", performance.now() - t00);
-    }, 5);
-
-    setTimeout(() => {
-      cy.startBatch();
       cy.add(network.elements.edges);
       cy.elements("edge")
         .on("mouseover", (evt) => {
@@ -90,26 +112,23 @@ class CytoscapeJsRenderer extends Component {
           const edge = evt.target;
           edge.style("text-opacity", 0);
         });
+      console.log("%%%%%%%%%%%%%%CYJS edgeAdded", performance.now() - t00);
+    }, 5);
 
+    setTimeout(() => {
+      console.log("%%%%%%%%%%%%%%CYJS APPLY", this.state.visualStyle);
+      cy.style(MINIMAL_STYLE);
       this.setPrimaryEdgeStatus(this.hidePrimary);
       this.setEventListener(cy);
-      cy.endBatch();
-      console.log("%%%%%%%%%%%%%%CYJS edgeAdded", performance.now() - t00);
-    }, 100);
-
-    this.setState({ rendered: true });
+      this.setState({ rendered: true });
+      console.log("%%%%%%%%%%%%%%CYJS FINISH", performance.now() - t00);
+    }, 2);
   };
 
   componentDidMount() {
     t00 = performance.now();
-
-    console.log(
-      "CYJS start========================================",
-      this.props
-    );
     // Create Cytoscape.js instance here, only once!
     const netStyleProp = this.props.networkStyle;
-
     let visualStyle = null;
 
     if (netStyleProp === undefined) {
@@ -127,13 +146,15 @@ class CytoscapeJsRenderer extends Component {
       Object.assign({
         container: this.cyjs,
         elements: [],
-        style: visualStyle,
         layout: {
           name: config.DEF_LAYOUT,
         },
       })
     );
     this.state.cyjs = cy;
+    this.setState({
+      visualStyle,
+    });
 
     // Render actual network
     this.updateCyjsInternal(this.props.network, cy);
@@ -175,7 +196,8 @@ class CytoscapeJsRenderer extends Component {
       cy.startBatch();
       cy.nodes().removeStyle();
       elements.unselect();
-      // console.log('Unselect done. ', performance.now() - t0)
+
+      console.log("Unselect done. ", performance.now() - t0);
 
       // const idListPermanent = [...selected.nodesPerm]
 
