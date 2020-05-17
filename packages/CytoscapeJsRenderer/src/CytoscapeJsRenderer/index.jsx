@@ -10,33 +10,6 @@ regCose(cytoscape);
 
 let t00 = 0;
 
-const MINIMAL_STYLE = [
-  {
-    selector: "edge",
-    style: {
-      "line-color": "data(color)"
-    },
-  },
-  {
-    selector: "node",
-    style: {
-      "background-color": "#FFFFFF",
-      "background-opacity": 0.2,
-      label: "data(name)"
-
-    },
-
-  },
-  {
-    selector: "node:selected",
-    style: {
-      "background-color": "#FF0000",
-      "background-opacity": 1
-
-    },
-
-  },
-];
 
 /**
  * Renderer using Cytoscape.js
@@ -117,7 +90,7 @@ class CytoscapeJsRenderer extends Component {
 
     setTimeout(() => {
       console.log("%%%%%%%%%%%%%%CYJS APPLY", this.state.visualStyle);
-      cy.style(MINIMAL_STYLE);
+      cy.style(this.state.visualStyle);
       this.setPrimaryEdgeStatus(this.hidePrimary);
       this.setEventListener(cy);
       this.setState({ rendered: true });

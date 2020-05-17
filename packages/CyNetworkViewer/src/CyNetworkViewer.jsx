@@ -27,8 +27,8 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    *   Object contains node properties. (Key is ID)
    */
   selectNodes: (nodeIds, properties = {}) => {
-    console.log('selectNodes called.')
-    console.log(nodeIds)
+    // console.log('selectNodes called.')
+    // console.log(nodeIds)
   },
 
   /**
@@ -39,7 +39,7 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    *   Object contains edge properties. (Key is ID)
    */
   selectEdges: (edgeIds, properties = {}) => {
-    console.log('selectEdges called.')
+    // console.log('selectEdges called.')
   },
 
   /**
@@ -48,7 +48,7 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    * @param nodeIds - Array of unselected node IDs
    */
   deselectNodes: (nodeIds) => {
-    console.log('deselectNodes called.')
+    // console.log('deselectNodes called.')
   },
 
   /**
@@ -61,7 +61,7 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
   },
 
   hideEdges: (edgeIds) => {
-    console.log('hideEdges called', edgeIds)
+    // console.log('hideEdges called', edgeIds)
   },
 
   /**
@@ -74,17 +74,17 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    *   are numbers represent (x,y) position of node with ID n.
    */
   changeNodePositions: nodePositions => {
-    console.log('changeNodePositions called.')
+    // console.log('changeNodePositions called.')
   },
 
   hoverOnNode: (nodeId, nodeProps) => {
-    console.log("Hover:")
-    console.log(nodeId, nodeProps)
+    // console.log("Hover:")
+    // console.log(nodeId, nodeProps)
   },
 
   hoverOutNode: (nodeId, nodeProps) => {
-    console.log("Hover out:")
-    console.log(nodeId, nodeProps)
+    // console.log("Hover out:")
+    // console.log(nodeId, nodeProps)
   },
 
   /**
@@ -96,8 +96,8 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    */
   //
   commandFinished: (lastCommand, status = {}) => {
-    console.log('Command Finished: ' + lastCommand);
-    console.log(status);
+    // console.log('Command Finished: ' + lastCommand);
+    // console.log(status);
   },
 
   // Are there any other important events we should handle...?
