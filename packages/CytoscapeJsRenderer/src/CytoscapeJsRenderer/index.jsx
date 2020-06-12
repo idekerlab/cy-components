@@ -3,13 +3,9 @@ import cytoscape from "cytoscape";
 import regCose from "cytoscape-cose-bilkent";
 import * as config from "./CytoscapeJsConfig";
 
-const EDGE_TYPE_TAG = "interaction";
-
-// Register optional layout plugin
 regCose(cytoscape);
 
 let t00 = 0;
-
 
 /**
  * Renderer using Cytoscape.js
@@ -59,6 +55,7 @@ class CytoscapeJsRenderer extends Component {
     cy.add(nodes);
 
     // Apply optional filter if available
+    console.log("************************************ run command CYJS", this.props);
     const command = this.props.rendererOptions.defaultFilter;
     if (command !== undefined && this.state.rendered === false) {
       this.runCommand(command);
@@ -91,10 +88,10 @@ class CytoscapeJsRenderer extends Component {
     setTimeout(() => {
       console.log("%%%%%%%%%%%%%%CYJS APPLY", this.state.visualStyle);
       cy.style(this.state.visualStyle);
-      this.setPrimaryEdgeStatus(this.hidePrimary);
+      this.setPrimaryEdgeStatus(this.props.hidePrimary);
       this.setEventListener(cy);
       this.setState({ rendered: true });
-      console.log("%%%%%%%%%%%%%%CYJS FINISH", performance.now() - t00);
+      console.log("%%%%%%%%%%%%%%CYJS FINISH INTERNAL2", performance.now() - t00);
     }, 12);
   };
 
@@ -132,7 +129,7 @@ class CytoscapeJsRenderer extends Component {
     // Render actual network
     this.updateCyjsInternal(this.props.network, cy);
     console.log(
-      "%%%%%%%%%%%%%%CYJS END========================================",
+      "%%%%%%%%%%%%%%CYJS END========================================2",
       performance.now() - t00
     );
   }
@@ -141,7 +138,6 @@ class CytoscapeJsRenderer extends Component {
     // Update is controlled by componentWillReceiveProps()
     return false;
   }
-
 
 
   simpleSelect(selected) {
@@ -167,7 +163,7 @@ class CytoscapeJsRenderer extends Component {
         cy.startBatch();
       const elements = cy.elements();
       elements.removeClass("members");
-      // cy.edges().toggleClass("hidden", true)
+      cy.edges().toggleClass("hidden", true)
       console.log("# toggle done. ", performance.now() - t0);
 
 
@@ -222,6 +218,7 @@ class CytoscapeJsRenderer extends Component {
         cy.startBatch();
         elements.removeClass("members");
         cy.edges().removeClass("hidden")
+        this.setPrimaryEdgeStatus(this.props.hidePrimary)
         cy.endBatch();
         console.log("# Clear done. ", performance.now() - t0);
         return
@@ -281,6 +278,9 @@ class CytoscapeJsRenderer extends Component {
             internalEdges.removeClass("hidden");
           }
         }
+
+      // Remove all if hidden
+      this.setPrimaryEdgeStatus(this.props.hidePrimary);
       cy.endBatch();
 
       console.log("CYJS Selection DONE::", performance.now() - t0);
@@ -553,7 +553,6 @@ class CytoscapeJsRenderer extends Component {
 
           toBeRemoved.remove();
           if (this.props.hidePrimary) {
-            console.log("**Hiding edge = ", this.props.hidePrimary);
             cy.edges().addClass("hidden");
           }
         } else {
@@ -591,6 +590,7 @@ class CytoscapeJsRenderer extends Component {
 
       if (edgeType !== undefined) {
         cy.startBatch();
+
 
         const mainEdgeType = this.state.networkData["Main Feature"].replace(
           / /g,
@@ -675,6 +675,7 @@ class CytoscapeJsRenderer extends Component {
     }
     return newEdges;
   };
+
 
   collapseEdges = (edgeType, edges) => {
     let i = edges.length;

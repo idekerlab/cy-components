@@ -23,9 +23,4 @@ const layoutTree = (tree, diameter, margin) => {
     .padding(0.1)(newTree)
 }
 
-
-const getScore = tree => {
-
-}
-
 export default layoutTree
