@@ -51,11 +51,10 @@ class CytoscapeJsRenderer extends Component {
     cy.removeAllListeners();
 
     const nodes = network.elements.nodes;
-    const nodeCount = nodes.length
+    const nodeCount = nodes.length;
     cy.add(nodes);
 
     // Apply optional filter if available
-    console.log("************************************ run command CYJS", this.props);
     const command = this.props.rendererOptions.defaultFilter;
     if (command !== undefined && this.state.rendered === false) {
       this.runCommand(command);
@@ -91,7 +90,6 @@ class CytoscapeJsRenderer extends Component {
       this.setPrimaryEdgeStatus(this.props.hidePrimary);
       this.setEventListener(cy);
       this.setState({ rendered: true });
-      console.log("%%%%%%%%%%%%%%CYJS FINISH INTERNAL2", performance.now() - t00);
     }, 12);
   };
 
@@ -126,19 +124,24 @@ class CytoscapeJsRenderer extends Component {
       visualStyle,
     });
 
+    // For resize
+    const parentElm = this.cyjs.current;
+    console.log("CYJS############# resize called", this.cyjs, parentElm);
+
+    if (parentElm !== undefined) {
+      parentElm.addEventListener("resize", (ev) => {
+        console.log("CYJS+++++++++++++++++++ resize called", ev);
+      });
+    }
+
     // Render actual network
     this.updateCyjsInternal(this.props.network, cy);
-    console.log(
-      "%%%%%%%%%%%%%%CYJS END========================================2",
-      performance.now() - t00
-    );
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     // Update is controlled by componentWillReceiveProps()
     return false;
   }
-
 
   simpleSelect(selected) {
     const t0 = performance.now();
@@ -151,94 +154,82 @@ class CytoscapeJsRenderer extends Component {
     try {
       const idList = selected.nodes;
 
-      if(idList.length === 0) {
+      if (idList.length === 0) {
         cy.startBatch();
         const elements = cy.elements();
         elements.removeClass("members");
         cy.endBatch();
         console.log("# Clear done. ", performance.now() - t0);
-        return
+        return;
       }
-      
-        cy.startBatch();
+
+      cy.startBatch();
       const elements = cy.elements();
       elements.removeClass("members");
-      cy.edges().toggleClass("hidden", true)
+      cy.edges().toggleClass("hidden", true);
       console.log("# toggle done. ", performance.now() - t0);
-
 
       const t2 = performance.now();
       const selected2 = idList.map((id) => "#" + id);
       const strVal = selected2.toString();
       const targets = cy.elements(strVal);
-      
-      
-        targets.toggleClass("members", true);
-        console.log("PICKING & select nodes::", performance.now() - t2);
-        cy.endBatch();
-        console.log("CYJS Selection DONE::", performance.now() - t0);
 
+      targets.toggleClass("members", true);
+      console.log("PICKING & select nodes::", performance.now() - t2);
+      cy.endBatch();
+      console.log("CYJS Selection DONE::", performance.now() - t0);
     } catch (ex) {
       console.warn("WNG");
     }
     cy.on(config.SUPPORTED_EVENTS, this.cyEventHandler);
-
   }
 
   select(selected) {
-
     const t0 = performance.now();
-    console.log("*** CYJS::SELECT start::::", selected);
-    
-    
-    if(selected === undefined || selected === null) {
-      return
+
+    if (selected === undefined || selected === null) {
+      return;
     }
 
     const idList = selected.nodes;
     if (!idList) {
       return;
     }
-    
+
     // Turn off event handlers for performance
     const cy = this.state.cyjs;
 
-    if(cy.edges().length >= 10000) {
-      return this.simpleSelect(selected)
+    if (cy.edges().length >= 10000) {
+      return this.simpleSelect(selected);
     }
-
 
     cy.off(config.SUPPORTED_EVENTS);
 
     try {
-
       const elements = cy.elements();
-      
-      if(idList.length === 0) {
+
+      if (idList.length === 0) {
         cy.startBatch();
         elements.removeClass("members");
-        cy.edges().removeClass("hidden")
-        this.setPrimaryEdgeStatus(this.props.hidePrimary)
+        cy.edges().removeClass("hidden");
+        this.setPrimaryEdgeStatus(this.props.hidePrimary);
         cy.endBatch();
         console.log("# Clear done. ", performance.now() - t0);
-        return
+        return;
       }
-      
+
       cy.startBatch();
       elements.removeClass("members");
-      cy.edges().removeClass("hidden")
+      cy.edges().removeClass("hidden");
       console.log("# toggle done. ", performance.now() - t0);
-
 
       const t2 = performance.now();
       const selected2 = idList.map((id) => "#" + id);
       const strVal = selected2.toString();
       const targets = cy.elements(strVal);
-      
-      
-        targets.toggleClass("members", true);
-        console.log("PICKING & select nodes::", performance.now() - t2);
 
+      targets.toggleClass("members", true);
+      console.log("PICKING & select nodes::", performance.now() - t2);
 
       // cy.startBatch();
       cy.nodes().removeStyle();
@@ -263,21 +254,21 @@ class CytoscapeJsRenderer extends Component {
       //   cy.endBatch()
       // }
 
-        if (targets) {
-          // Fade all nodes and edges first.
-          const connectingEdges = targets.connectedEdges();
-          const allNodes = connectingEdges.connectedNodes();
-          const diff = allNodes.diff(targets);
-          const toBeRemoved = diff.left.edgesWith(targets);
-          const edgeDiff = connectingEdges.diff(toBeRemoved);
-          const internalEdges = edgeDiff.left;
+      if (targets) {
+        // Fade all nodes and edges first.
+        const connectingEdges = targets.connectedEdges();
+        const allNodes = connectingEdges.connectedNodes();
+        const diff = allNodes.diff(targets);
+        const toBeRemoved = diff.left.edgesWith(targets);
+        const edgeDiff = connectingEdges.diff(toBeRemoved);
+        const internalEdges = edgeDiff.left;
 
-          if (internalEdges) {
-            cy.edges().addClass("hidden");
-            // targets.removeClass("hidden").select();
-            internalEdges.removeClass("hidden");
-          }
+        if (internalEdges) {
+          cy.edges().addClass("hidden");
+          // targets.removeClass("hidden").select();
+          internalEdges.removeClass("hidden");
         }
+      }
 
       // Remove all if hidden
       this.setPrimaryEdgeStatus(this.props.hidePrimary);
@@ -591,7 +582,6 @@ class CytoscapeJsRenderer extends Component {
       if (edgeType !== undefined) {
         cy.startBatch();
 
-
         const mainEdgeType = this.state.networkData["Main Feature"].replace(
           / /g,
           "_"
@@ -675,7 +665,6 @@ class CytoscapeJsRenderer extends Component {
     }
     return newEdges;
   };
-
 
   collapseEdges = (edgeType, edges) => {
     let i = edges.length;
@@ -808,7 +797,12 @@ class CytoscapeJsRenderer extends Component {
 
   render() {
     const baseStyle = this.props.style;
-    return <div ref={(cyjs) => (this.cyjs = cyjs)} style={baseStyle} />;
+    return (
+      <div
+        ref={(cyjs) => (this.cyjs = cyjs)}
+        style={baseStyle}
+      />
+    );
   }
 }
 

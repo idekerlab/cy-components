@@ -18,6 +18,9 @@ const CirclePackingRenderer = props => {
   // For initialization
   useEffect(() => {
     if (!initialized) {
+    console.log(
+      '--------------------GOT tree--Search result given -----------------------', props
+    )
       CirclePacking(
         props.tree,
         treeRef.current,
@@ -39,9 +42,6 @@ const CirclePackingRenderer = props => {
   }, [props.command])
 
   useEffect(() => {
-    console.log(
-      '----------------------------------Search result given -----------------------'
-    )
     selectNodes(props.selected)
   }, [props.selected])
 
