@@ -119,14 +119,20 @@ class CytoscapeJsRenderer extends Component {
         },
       })
     );
+
+    // If setter is provided from user, pass cy instance
+    if(this.props.setRendererReference !== null) {
+      this.props.setRendererReference(cy)
+    }
+    
     this.state.cyjs = cy;
+
     this.setState({
       visualStyle,
     });
 
     // For resize
     const parentElm = this.cyjs.current;
-    console.log("CYJS############# resize called", this.cyjs, parentElm);
 
     if (parentElm !== undefined) {
       parentElm.addEventListener("resize", (ev) => {

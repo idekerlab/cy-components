@@ -187,6 +187,9 @@ const CyNetworkViewer = RendererComponent => {
     // Command for renderer to be executed next.
     // This is null except when something is actually running in renderer
     command: PropTypes.object,
+
+    // Obtain access to the native renderer object
+    setRendererReference: PropTypes.func
   }
 
   Viewer.defaultProps = {
@@ -199,7 +202,9 @@ const CyNetworkViewer = RendererComponent => {
     eventHandlers: DEF_EVENT_HANDLERS.toJS(),
     rendererOptions: {
       layout: 'preset' // For Cytoscape.js
-    }
+    },
+
+    setRendererReference: null
   }
 
   Viewer.displayName = `Viewer(${getDisplayName(RendererComponent)})`
