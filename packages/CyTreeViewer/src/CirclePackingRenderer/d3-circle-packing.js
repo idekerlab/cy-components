@@ -1,77 +1,71 @@
-import * as d3Selection from "d3-selection";
-import * as d3Zoom from "d3-zoom";
+import * as d3Selection from 'd3-selection'
+import * as d3Zoom from 'd3-zoom'
 
-import getColorMap, { blueMap, redMap } from "./colormap-generator";
-import getSvg from "./svg-container-factory";
-import getTooltip from "./tooltip-factory";
-import layoutTree from "./layout-tree";
+import getColorMap, { blueMap, redMap } from './colormap-generator'
+import getSvg from './svg-container-factory'
+import getTooltip from './tooltip-factory'
+import layoutTree from './layout-tree'
 
-let colorMapper = null;
-const MARGIN = 50;
-const MAX_DEPTH = 3;
-const ZOOM_TH_1 = 4.0;
+let colorMapper = null
+const MARGIN = 50
+const MAX_DEPTH = 3
+const ZOOM_TH_1 = 4.0
 
 // TODO: Manage these states in React way
-let currentDepth = 0;
+let currentDepth = 0
 
-let g;
+let g
 
-let props;
-let focus;
-let view;
+let props
+let focus
 
-let node;
+let node
 
-let diameter;
+let diameter
 
-let circle;
+let circle
 
-let circleNodes;
-let labels;
+let root
 
-let root;
+let subSelected = new Map()
+let selectedSubsystem = null
 
-let subSelected = new Map();
-let selectedSubsystem = null;
+let nodeCount = 0
 
-let nodeCount = 0;
+let sizeTh = 0
 
-let sizeTh = 0;
+const labelSizeMap = new Map()
 
-const labelSizeMap = new Map();
+let svg = null
+let tooltip = null
+let zoom2 = null
 
-let svg = null;
-let tooltip = null;
-let zoom2 = null;
+let currentNodes = []
+let d3circles = null
 
-let currentNodes = [];
-let d3circles = null;
+let searchResults = []
+let blueMapper = null
+let redMapper = null
 
-let searchResults = [];
-let blueMapper = null;
-let redMapper = null;
+let expandDepth = 1
 
-let expandDepth = 1;
+let trans = {}
 
-let trans = {};
+let lastHighlight = null
 
-let lastHighlight = null;
+const MIN_RADIUS = 4
+const DEF_SCALE_FACTOR = 1.0
 
-const MIN_RADIUS = 4;
-const DEF_SCALE_FACTOR = 1.0;
-
-let lastDepth = 1;
-
-let lastRootColor = "#CCCCCC";
-let lastLeafColor = "#FFFFFF";
+let lastRootColor = '#CCCCCC'
+let lastLeafColor = '#FFFFFF'
 
 const initializeColorMaps = (rootColor, leafColor) => {
-  colorMapper = getColorMap(rootColor, leafColor);
+  colorMapper = getColorMap(rootColor, leafColor)
 
   // Optional mappers
-  blueMapper = blueMap();
-  redMapper = redMap();
-};
+  blueMapper = blueMap()
+  redMapper = redMap()
+}
 
 /**
  * Main function to generate circle packing
@@ -79,134 +73,125 @@ const initializeColorMaps = (rootColor, leafColor) => {
  */
 const CirclePacking = (tree, svgTree, w, h, originalProps) => {
   if (tree === null || tree === undefined) {
-    return;
+    return
   }
 
-  const t0 = performance.now();
-  props = originalProps;
-  const leafColor = props.rendererOptions.leafColor;
-  const rootColor = props.rendererOptions.rootColor;
-  lastRootColor = rootColor;
-  lastLeafColor = leafColor;
+  props = originalProps
+  const leafColor = props.rendererOptions.leafColor
+  const rootColor = props.rendererOptions.rootColor
+  lastRootColor = rootColor
+  lastLeafColor = leafColor
 
-  initializeColorMaps(rootColor, leafColor);
+  initializeColorMaps(rootColor, leafColor)
 
-  tooltip = getTooltip();
-  svg = getSvg(svgTree, w, h).style("background", "#FFFFFF");
+  tooltip = getTooltip()
+  svg = getSvg(svgTree, w, h).style('background', '#FFFFFF')
 
-  diameter = +svg.attr("height");
+  diameter = +svg.attr('height')
 
-  const t01 = performance.now();
+  root = layoutTree(tree, diameter, MARGIN)
+  props.setHierarchy(root)
 
-  root = layoutTree(tree, diameter, MARGIN);
-  props.setHierarchy(root);
+  let nodes = root.children
+  nodeCount = nodes.length
 
-  let nodes = root.children;
-  nodeCount = nodes.length;
-
-  currentNodes = nodes;
-  focus = root;
+  currentNodes = nodes
+  focus = root
 
   // Base setting.
-  g = svg.append("g");
+  g = svg.append('g')
 
   const zoomed2 = () => {
-    trans = d3Selection.event.transform;
+    trans = d3Selection.event.transform
 
     if (selectedGroups) {
       if (trans.k > ZOOM_TH_1) {
-        selectedGroups.attr("r", (d) => d.r);
+        selectedGroups.attr('r', d => d.r)
       } else {
-        selectedGroups.attr("r", (d) => calcRadius(d));
+        selectedGroups.attr('r', d => calcRadius(d))
       }
     }
-    g.attr("transform", trans);
-  };
+    g.attr('transform', trans)
+  }
 
   zoom2 = d3Zoom
     .zoom()
     .scaleExtent([1 / 10, 500])
-    .on("zoom", zoomed2);
+    .on('zoom', zoomed2)
 
-  svg.call(zoom2).on("dblclick.zoom", null);
+  svg.call(zoom2).on('dblclick.zoom', null)
 
   // Now label map is available.
-  const labelSizes = [...labelSizeMap.values()];
-  const sorted = labelSizes.sort((a, b) => a - b);
+  const labelSizes = [...labelSizeMap.values()]
+  const sorted = labelSizes.sort((a, b) => a - b)
 
-  sizeTh = sorted[Math.floor(sorted.length * 0.85)];
+  sizeTh = sorted[Math.floor(sorted.length * 0.85)]
 
-  const labelTargets = selectCurrentNodes(root.children, "l");
+  const labelTargets = selectCurrentNodes(root.children, 'l')
 
   labelTargets
-    .style("display", (d) => {
-      const size = labelSizeMap.get(d.data.id);
+    .style('display', d => {
+      const size = labelSizeMap.get(d.data.id)
 
       if (size > sizeTh) {
-        return "inline";
+        return 'inline'
       } else {
-        return "none";
+        return 'none'
       }
     })
-    .style("font-size", (d) => labelSizeMap.get(d.data.id));
+    .style('font-size', d => labelSizeMap.get(d.data.id))
 
-  node = g.selectAll("circle,text");
-  circleNodes = g.selectAll("circle");
-  labels = g.selectAll(".label");
+  node = g.selectAll('circle,text')
+  // circleNodes = g.selectAll('circle')
+  // labels = g.selectAll('.label')
 
-  expand(root);
-  console.log("D3 Initial layout total:", performance.now() - t0);
-};
+  expand(root)
+}
 
-const getFontSize = (d) => {
-  const txt = d.data.data.Label;
-  const textLen = txt.length;
+const getFontSize = d => {
+  const txt = d.data.data.Label
+  const textLen = txt.length
 
-  let size = 10;
+  let size = 10
   if (textLen <= 5) {
-    size = (d.r * 2) / textLen;
+    size = (d.r * 2) / textLen
   } else {
-    size = (d.r * 3) / textLen;
+    size = (d.r * 3) / textLen
   }
 
-  return size;
-};
+  return size
+}
 
-const createSizeMap = (d) => {
-  const size = getFontSize(d);
-  labelSizeMap.set(d.data.id, size);
-  return size;
-};
+const createSizeMap = d => {
+  const size = getFontSize(d)
+  labelSizeMap.set(d.data.id, size)
+  return size
+}
 
 const addLabels = (container, data, newFocus) => {
   // Remove everything first
-  g.selectAll("text")
+  g.selectAll('text')
     .data([])
     .exit()
-    .remove();
+    .remove()
 
   // Size filter: do not show small labels
 
   const isPath = (d, selected) => {
     if (d.depth > selected.depth + 1) {
-      return false;
+      return false
     }
 
-    const parent = selected.parent;
-  };
-  const filtered = root.children.filter((d) => {
-    const labelSize = getFontSize(d);
-    console.log("filter", d, selectedSubsystem);
+    const parent = selected.parent
+  }
+  const filtered = root.children.filter(d => {
+    const labelSize = getFontSize(d)
 
-    if (
-      d.parent !== null &&
-      selectedSubsystem !== null &&
-      d.parent === selectedSubsystem
-    ) {
+    if (d.parent !== null && selectedSubsystem !== null && d.parent === selectedSubsystem) {
       if (d !== selectedSubsystem) {
-        return true;
+        return true
       } else if (d.parent === selectedSubsystem) {
-        return true;
+        return true
       }
       // } else if(d.parent !== null &&
       //   selectedSubsystem !== null && d.parent === selectedSubsystem.parent) {
@@ -221,50 +206,49 @@ const addLabels = (container, data, newFocus) => {
     if (d.depth === 1) {
       // Special case: showing search result
       if (searchResults.length !== 0 && checkParents(selectedSubsystem, d)) {
-        return false;
+        return false
       }
       // Check direct parent or not
-      const allChildren = new Set(d.descendants());
-      return !allChildren.has(newFocus);
+      const allChildren = new Set(d.descendants())
+      return !allChildren.has(newFocus)
     }
     // }
 
-    return false;
-  });
+    return false
+  })
 
   // Add direct children and neighbors
-  const LABEL_TH = 200;
+  const LABEL_TH = 200
 
-  const pathNodes = new Set();
+  const pathNodes = new Set()
   const scan = (ancestors, node) => {
     if (node === null || node === undefined) {
-      return ancestors;
+      return ancestors
     }
-    const parent = node.parent;
+    const parent = node.parent
     if (parent === root || parent === null) {
-      return ancestors;
+      return ancestors
     }
 
-    const { children } = parent;
-    const childrenCount = children.length;
-    children.forEach((child) => {
-
-      if(node !== child && childrenCount < LABEL_TH) {
-        filtered.push(child);
+    const { children } = parent
+    const childrenCount = children.length
+    children.forEach(child => {
+      if (node !== child && childrenCount < LABEL_TH) {
+        filtered.push(child)
       } else if (node !== child && child.height !== 0) {
-        filtered.push(child);
+        filtered.push(child)
       }
     })
 
-    return scan(ancestors, parent);
-  };
+    return scan(ancestors, parent)
+  }
 
-  scan(pathNodes, selectedSubsystem);
+  scan(pathNodes, selectedSubsystem)
 
-  const children = selectedSubsystem.children;
+  const children = selectedSubsystem.children
   if (children !== undefined) {
-    children.forEach((child) => {
-      filtered.push(child);
+    children.forEach(child => {
+      filtered.push(child)
     })
   } else {
     // Leaf node
@@ -279,23 +263,23 @@ const addLabels = (container, data, newFocus) => {
     }
   }
   if (selectedSubsystem.height === 0) {
-    filtered.push(selectedSubsystem);
+    filtered.push(selectedSubsystem)
   }
 
-  const currentLabels = container.selectAll("text").data(filtered);
+  const currentLabels = container.selectAll('text').data(filtered)
 
   return currentLabels
     .enter()
-    .append("text")
-    .attr("id", (d) => "l" + d.data.id)
-    .attr("class", "label")
-    .style("fill", (d) => getLabelColor(d))
-    .style("text-anchor", "middle")
-    .attr("x", (d) => d.x)
-    .attr("y", (d) => d.y)
-    .text((d) => d.data.data.Label)
-    .style("font-size", (d) => createSizeMap(d));
-};
+    .append('text')
+    .attr('id', d => 'l' + d.data.id)
+    .attr('class', 'label')
+    .style('fill', d => getLabelColor(d))
+    .style('text-anchor', 'middle')
+    .attr('x', d => d.x)
+    .attr('y', d => d.y)
+    .text(d => d.data.data.Label)
+    .style('font-size', d => createSizeMap(d))
+}
 
 /**
  * Check path to the target node.
@@ -307,156 +291,201 @@ const addLabels = (container, data, newFocus) => {
  */
 const checkParents = (current, target) => {
   if (current === target) {
-    return true;
+    return true
   }
 
-  const parent = current.parent;
+  const parent = current.parent
   if (parent === undefined || parent === null) {
-    return false;
+    return false
   }
 
-  return checkParents(parent, target);
-};
+  return checkParents(parent, target)
+}
 
-const getLabelColor = (d) => {
-  const data = d.data.data;
+const getLabelColor = d => {
+  const data = d.data.data
 
-  if (data.NodeType === "Gene") {
-    return "#222222";
+  if (data.NodeType === 'Gene') {
+    return '#222222'
   }
   // This is a hidden node.
   if (data.props.Hidden === true) {
-    return "#222222";
+    return '#222222'
   } else if (d.depth > 3) {
-    return "#393939";
+    return '#393939'
   } else {
-    return "#FFFFFF";
+    return '#FFFFFF'
   }
-};
+}
 
-const buildData = (dOriginal) => {
+const buildData = dOriginal => {
+  // Special case: root node is the target
   if (dOriginal === root) {
-    return root.descendants().filter((node) => node.depth < expandDepth + 1);
+    return root.descendants().filter(node => node.depth < expandDepth + 1)
   }
 
-  let d = dOriginal;
-
-  let nextP = d.parent;
-  const pList = [];
-  const parents = new Set();
+  // This is the starting point (selected subsystem)
+  const d = dOriginal
+  let nextP = d.parent
+  const pList = []
+  const parents = new Set()
   while (nextP !== undefined && nextP !== root) {
-    parents.add(nextP);
-    pList.push(nextP);
-    nextP = nextP.parent;
+    parents.add(nextP)
+    pList.push(nextP)
+    nextP = nextP.parent
   }
 
   // Filter higher level terms
   //    - Add only to the specified depth
-  let newNodes = root.descendants().filter((child) => {
+  let newNodes = root.descendants().filter(child => {
+
+    // System higher than expand depth
     if (child.depth < expandDepth + 1) {
-      return true;
+      return true
     }
+
     if (child.parent !== null && d.parent !== null) {
       if (d.parent === child.parent) {
-        return true;
+        return true
       }
       if (child === d.parent) {
-        return true;
+        return true
       }
     }
 
     if (parents.has(child)) {
-      return true;
+      return true
     }
-    return false;
-  });
+    return false
+  })
 
-  const rList = pList.reverse();
-  rList.forEach((p) => {
-    if (p.children !== undefined) {
-      p.children.forEach((child) => {
-        newNodes.push(child);
-      });
+  const rList = pList.reverse()
+  rList.forEach(p => {
+    if (p.height !== 0) {
+      p.children.forEach(child => {
+        if(child.depth < expandDepth) {
+          newNodes.push(child)
+        }
+      })
     }
-  });
+  })
 
-  // Add all direct children
-  if (d.children !== undefined) {
-    d.children.forEach((child) => {
-      newNodes.push(child);
-    });
+  const currentDepth = d.depth
+
+  // Add all others from here to depth n
+  const addChildren = (node, nodes) => {
+    
+    // Leaf node
+    if (node.height === 0 || (node.depth > d.depth && node.depth > expandDepth) ) {
+      return
+    }
+
+    const children = node.children
+    children.forEach(c => {
+      nodes.push(c)
+      addChildren(c, nodes)
+    })
   }
+  addChildren(d, newNodes)
 
-  return newNodes;
-};
+  const pathToRoot = []
+  const traverse = node => {
+    const parent = node.parent
+    if (parent === root) {
+      return
+    }
+    pathToRoot.push(parent)
+    traverse(parent)
+  }
+  traverse(d)
 
-const expand = (d) => {
-  selectedSubsystem = d;
-  const newNodes = buildData(d);
+  // Add all nodes to 
+  pathToRoot.forEach(node => {
+    if (node !== d) {
+      addChildren(node, newNodes)
+    }
+  })
 
-  addCircles(g, newNodes, d);
-  addLabels(g, newNodes, d);
+  // System in the same level
+  // if(d.parent !== root) {
+  //   const sameLevel = d.parent.children
+  //   sameLevel.forEach(c => {
+  //     if(c.height !== 0 && c.depth < expandDepth + 1) {
+  //       addChildren(c, newNodes)
+  //     }
+  //   })
+  // }
+
+  return newNodes
+}
+
+const expand = d => {
+  selectedSubsystem = d
+  const newNodes = buildData(d)
+
+  addCircles(g, newNodes, d)
+  addLabels(g, newNodes, d)
 
   if (focus !== d || !focus.parent) {
-    zoom(d);
+    zoom(d)
     if (d3Selection.event !== undefined && d3Selection.event !== null) {
-      d3Selection.event.stopPropagation();
+      d3Selection.event.stopPropagation()
     }
   }
 
-  restoreHighlight();
-};
+  restoreHighlight()
+}
 
-const expandSearchResult = (results) => {
-  const newNodes = addSearchResults(results);
-  addCircles(g, newNodes, root);
-  addLabels(g, newNodes, root);
-};
+const expandSearchResult = results => {
+  const newNodes = addSearchResults(results)
+  addCircles(g, newNodes, root)
+  addLabels(g, newNodes, root)
+}
 
-const getParents = (node) => {
-  let nextP = node.parent;
-  const pList = [];
+const getParents = node => {
+  let nextP = node.parent
+  const pList = []
   while (nextP !== undefined && nextP !== root) {
-    pList.push(nextP);
-    nextP = nextP.parent;
+    pList.push(nextP)
+    nextP = nextP.parent
   }
-  return pList;
-};
+  return pList
+}
 
 // Expand
-const addSearchResults = (results) => {
-  const selectedSet = new Set(results);
+const addSearchResults = results => {
+  const selectedSet = new Set(results)
 
-  const allNodes = root.descendants();
-  let idx = allNodes.length;
-  let newNodes = [];
+  const allNodes = root.descendants()
+  let idx = allNodes.length
+  let newNodes = []
 
   // 1. Add root (base circle)
-  newNodes.push(root);
+  newNodes.push(root)
 
   // 2. Add depth 1 nodes
-  const selectedParents = [];
+  const selectedParents = []
 
   while (idx--) {
-    const node = allNodes[idx];
-    const nodeId = node.data.data.id;
+    const node = allNodes[idx]
+    const nodeId = node.data.data.id
 
     if (node.depth === 1) {
-      newNodes.push(node);
+      newNodes.push(node)
     }
 
     if (selectedSet.has(nodeId)) {
       // This is one of the selected node
-      const parents = getParents(node);
-      const rList = parents.reverse();
-      parents.forEach((p) => {
-        newNodes.push(p);
+      const parents = getParents(node)
+      const rList = parents.reverse()
+      parents.forEach(p => {
+        newNodes.push(p)
         if (p.children !== undefined) {
-          p.children.forEach((child) => {
-            newNodes.push(child);
-          });
+          p.children.forEach(child => {
+            newNodes.push(child)
+          })
         }
-      });
+      })
 
       // selectedParents.push(parents)
     }
@@ -481,349 +510,368 @@ const addSearchResults = (results) => {
   //   })
   // }
 
-  idx = allNodes.length;
+  idx = allNodes.length
   while (idx--) {
-    const node = allNodes[idx];
-    const nodeId = node.data.data.id;
+    const node = allNodes[idx]
+    const nodeId = node.data.data.id
     if (selectedSet.has(nodeId)) {
-      newNodes.push(node);
+      newNodes.push(node)
     }
   }
-  return newNodes;
-};
+  return newNodes
+}
 
 const addCircles = (container, data, newFocus) => {
-  g.selectAll("circle")
+  g.selectAll('circle')
     .data([])
     .exit()
-    .remove();
+    .remove()
 
   d3circles = svg
-    .select("g")
-    .selectAll("circle")
-    .data(data);
+    .select('g')
+    .selectAll('circle')
+    .data(data)
 
   d3circles
     .enter()
-    .append("circle")
-    .attr("id", (d) => "c" + d.data.id)
-    .attr("class", (d) => {
-      return d.parent ? (d.children ? "node" : "node node--leaf") : "node";
+    .append('circle')
+    .attr('id', d => 'c' + d.data.id)
+    .attr('class', d => {
+      return d.parent ? (d.children ? 'node' : 'node node--leaf') : 'node'
     })
-    .classed("node-selected", (d) => {
-      return d === newFocus;
+    .classed('node-selected', d => {
+      return d === newFocus
     })
-    .on("click", (d, i, nodes) => {
+    .on('click', (d, i, nodes) => {
       if (d === undefined) {
-        return;
+        return
       }
-      hideTooltip(tooltip);
+      hideTooltip(tooltip)
     })
-    .on("dblclick", (d, i, nodes) => {
+    .on('dblclick', (d, i, nodes) => {
       if (d === undefined) {
-        return;
+        return
       }
-      hideTooltip(tooltip);
-      expand(d, i, nodes);
+      hideTooltip(tooltip)
+      expand(d, i, nodes)
 
       // Repaint selected
-      selectNodes(searchResults);
+      selectNodes(searchResults)
     })
-    .on("mouseover", (d, i, nodes) => {
-      showTooltip(tooltip, d);
-      handleMouseOver(d, i, nodes, props);
+    .on('mouseover', (d, i, nodes) => {
+      showTooltip(tooltip, d)
+      handleMouseOver(d, i, nodes, props)
     })
-    .on("mouseout", (d, i, nodes) => {
-      hideTooltip(tooltip);
-      handleMouseOut(d, props);
+    .on('mouseout', (d, i, nodes) => {
+      hideTooltip(tooltip)
+      handleMouseOut(d, props)
     })
-    .on("contextmenu", (d, i, nodes) => {
+    .on('contextmenu', (d, i, nodes) => {
       if (d === undefined) {
-        return;
+        return
       }
 
       if (d3Selection.event.ctrlKey) {
-        d3Selection.event.preventDefault();
+        d3Selection.event.preventDefault()
 
         // CTR-Click means multiple selection in the current circle.
-        const newSelection = d3Selection.select(nodes[i]);
+        const newSelection = d3Selection.select(nodes[i])
 
         // ID of new Circle (subsystem)
-        const newId = d.data.id;
+        const newId = d.data.id
 
         // Toggle selection.
         if (subSelected.has(newId)) {
-          subSelected.delete(newId);
+          subSelected.delete(newId)
 
-          newSelection.classed("node-selected-sub", false);
-          props.eventHandlers.deselectNode(newId, d.data.data.props);
+          newSelection.classed('node-selected-sub', false)
+          props.eventHandlers.deselectNode(newId, d.data.data.props)
 
-          return;
+          return
         } else {
           // New selection
-          subSelected.set(newId, newSelection);
-          newSelection.classed("node-selected-sub", true);
+          subSelected.set(newId, newSelection)
+          newSelection.classed('node-selected-sub', true)
 
           // Call action to select nodes in the view
 
           // props.eventHandlers.selectNode(d.data.id, d.data.data.props, false)
         }
 
-        props.eventHandlers.selectNodes(d.data.id, d.data.data.props);
+        props.eventHandlers.selectNodes(d.data.id, d.data.data.props)
       }
     })
-    .style("fill", function(d) {
-      const data = d.data.data;
+    .style('fill', function(d) {
+      const data = d.data.data
 
-      if (data.props.BlueNodes) {
-        return blueMapper(d.depth);
-      } else if (data.props.RedNodes) {
-        return redMapper(d.depth);
-      }
-      return colorMapper(d.depth);
-
-      if (d.children) {
-        return colorMapper(d.depth);
-      } else {
-        if (data.NodeType !== "Gene") {
-          return colorMapper(d.depth);
+      if(data !== undefined && data.props !== undefined) {
+        if (data.props.BlueNodes) {
+          return blueMapper(d.depth)
+        } else if (data.props.RedNodes) {
+          return redMapper(d.depth)
         }
-        return "rgba(255, 255, 255, 0.8)";
-      }
-    })
-    .attr("r", (d) => d.r)
-    .attr("cx", (d) => d.x)
-    .attr("cy", (d) => d.y);
 
-  return d3circles;
-};
+      }
+      return colorMapper(d.depth)
+
+      // if (d.children) {
+      //   return colorMapper(d.depth)
+      // } else {
+      //   if (data.NodeType !== 'Gene') {
+      //     return colorMapper(d.depth)
+      //   }
+      //   return 'rgba(255, 255, 255, 0.8)'
+      // }
+    })
+    .attr('r', d => d.r)
+    .attr('cx', d => d.x)
+    .attr('cy', d => d.y)
+
+  return d3circles
+}
 
 const selectCurrentNodes = (nodes, type) => {
-  const nodeIds = nodes.map((node) => "#" + type + node.data.id).join(", ");
-  return d3Selection.selectAll(nodeIds);
-};
+  const nodeIds = nodes.map(node => '#' + type + node.data.id).join(', ')
+  return d3Selection.selectAll(nodeIds)
+}
 
-const zoom = (d) => {
+const zoom = d => {
   // Update current focus
-  focus = d;
-  props.eventHandlers.selectNode(d.data.id, d.data.data.props, true, d);
-};
+  focus = d
+  props.eventHandlers.selectNode(d.data.id, d.data.data.props, true, d)
+}
 
-const zoomTo = (v) => {
-  const k = diameter / v[2];
+const zoomTo = v => {
+  const k = diameter / v[2]
 
-  view = v;
-  node.attr(
-    "transform",
-    (d) => "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"
-  );
+  view = v
+  node.attr('transform', d => 'translate(' + (d.x - v[0]) * k + ',' + (d.y - v[1]) * k + ')')
 
-  circle.attr("r", (d) => d.r * k);
-};
+  circle.attr('r', d => d.r * k)
+}
 
 const handleMouseOver = (d, i, nodes, props) => {
-  const parent = d.parent;
+  const parent = d.parent
   if (parent === selectedSubsystem) {
-    props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent);
+    props.eventHandlers.hoverOnNode(d.data.id, d.data.data, d.parent)
   }
-};
+}
 
 const handleMouseOut = (d, props) => {
-  const parent = d.parent;
+  const parent = d.parent
 
   if (parent === selectedSubsystem) {
-    props.eventHandlers.hoverOutNode(d.data.id, d.data.data.props);
+    props.eventHandlers.hoverOutNode(d.data.id, d.data.data.props)
   }
-};
+}
 
 const showTooltip = (div, node) => {
-  const label = node.data.data.Label;
-  const name = node.data.data.props.name;
-  let parentNode = node.parent;
+  const label = node.data.data.Label
+  const name = node.data.data.props.name
+  let parentNode = node.parent
 
-  let parent = null;
+  let parent = null
   if (parentNode) {
-    parent = parentNode.data.data.Label;
+    parent = parentNode.data.data.Label
   }
 
-  let text = name + "</br><strong>" + label + "</strong>";
+  let text = name + '</br><strong>' + label + '</strong>'
   if (parent !== null) {
-    text = text + "</br>(Child of " + parent + ")";
+    text = text + '</br>(Child of ' + parent + ')'
   }
 
-  div.style("opacity", 0.9);
+  div.style('opacity', 0.9)
   div
-    .html(
-      '<div style="font-size: 1em; padding-bottom: 0.5em; line-height: 1.1em; color: #222222">' +
-        text +
-        "</div>"
-    )
-    .style("left", d3Selection.event.pageX + 30 + "px")
-    .style("top", d3Selection.event.pageY - 30 + "px");
-};
+    .html('<div style="font-size: 1em; padding-bottom: 0.5em; line-height: 1.1em; color: #222222">' + text + '</div>')
+    .style('left', d3Selection.event.pageX + 30 + 'px')
+    .style('top', d3Selection.event.pageY - 30 + 'px')
+}
 
-const hideTooltip = (div) => {
-  div.style("opacity", 0);
-};
+const hideTooltip = div => {
+  div.style('opacity', 0)
+}
 
-let selectedGroups = null;
-let highlightMap = null;
+const expandSearch = d => {
+  selectedSubsystem = d
+  const newNodes = buildData(d)
+
+  addCircles(g, newNodes, d)
+  addLabels(g, newNodes, d)
+
+  if (focus !== d || !focus.parent) {
+    zoom(d)
+    if (d3Selection.event !== undefined && d3Selection.event !== null) {
+      d3Selection.event.stopPropagation()
+    }
+  }
+
+  restoreHighlight()
+}
+
+let selectedGroups = null
+let highlightMap = null
+
 /**
  * Show selection by changing color and size
  *
  * @param selected
  * @param fillColor
  */
-export const selectNodes = (id2color) => {
-  if (
-    id2color === null ||
-    id2color === undefined ||
-    id2color.size === 0 ||
-    id2color.get === undefined
-  ) {
-    return;
+export const selectNodes = id2color => {
+  if (id2color === null || id2color === undefined || id2color.size === 0 || id2color.get === undefined) {
+    return
   }
 
-  const selected = Array.from(id2color.keys());
-  searchResults = selected;
+  const selected = Array.from(id2color.keys())
+  searchResults = selected
   const selectedCircles = selected
-    .map((id) => "#c" + id)
-    .reduce(
-      (previousValue, currentValue, index, array) =>
-        previousValue + ", " + currentValue
-    );
+    .map(id => '#c' + id)
+    .reduce((previousValue, currentValue, index, array) => previousValue + ', ' + currentValue)
 
-  lastDepth = expandDepth;
-  expandDepth = 6;
-  expand(selectedSubsystem);
-  selectedGroups = d3Selection.selectAll(selectedCircles);
+  // lastDepth = expandDepth
+  expandDepth = 10
+
+  // expand(selectedSubsystem)
+  expandSearch(root)
+
+  selectedGroups = d3Selection.selectAll(selectedCircles)
+
+  console.log('------------> selected2', searchResults, selectedGroups, selectedCircles)
   selectedGroups
-    .style("fill", (d) => id2color.get(d.data.id))
-    .style("display", "inline")
-    .attr("r", (d) => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)));
+    .style('fill', d => id2color.get(d.data.id))
+    .style('display', 'inline')
+    .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)))
 
   // Show labels
   const selectedLabels = selected
-    .map((id) => "#l" + id)
-    .reduce(
-      (previousValue, currentValue, index, array) =>
-        previousValue + ", " + currentValue
-    );
-  d3Selection
-    .selectAll(selectedLabels)
-    .style("font-size", (d) => labelSizeMap.get(d.data.id))
-    .style("display", "inline")
-    .style("fill", "#FFFFFF");
+    .map(id => '#l' + id)
+    .reduce((previousValue, currentValue, index, array) => previousValue + ', ' + currentValue)
 
-  highlightMap = id2color;
-};
+  const labelTargets = d3Selection.selectAll(selectedLabels)
+
+  labelTargets
+    .enter()
+    .append('text')
+    .attr('id', d => 'l' + d.data.id)
+    .attr('class', 'label')
+    .style('fill', d => getLabelColor(d))
+    .style('text-anchor', 'middle')
+    .attr('x', d => d.x)
+    .attr('y', d => d.y)
+    .text(d => d.data.data.Label)
+    // .style("font-size", (d) => createSizeMap(d));
+    .style('font-size', d => labelSizeMap.get(d.data.id))
+  // .style("display", "inline")
+  // .style("fill", "#FFFFFF");
+
+  highlightMap = id2color
+}
 
 const calcRadius = (d, scaleFactor = DEF_SCALE_FACTOR) => {
-  const radius = d.r;
+  const radius = d.r
 
   if (radius < MIN_RADIUS) {
-    return MIN_RADIUS * scaleFactor;
+    return MIN_RADIUS * scaleFactor
   } else {
-    return radius * scaleFactor;
+    return radius * scaleFactor
   }
-};
+}
 
-const clearHighlight = (id2color) => {
+const clearHighlight = id2color => {
   if (lastHighlight) {
     lastHighlight
-      .style("fill", (d) => id2color.get(d.data.id))
-      .style("display", "inline")
-      .attr("r", (d) => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)));
+      .style('fill', d => id2color.get(d.data.id))
+      .style('display', 'inline')
+      .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)))
   }
-};
+}
 
 export const highlightNode = (selected, id2color) => {
   // Set back to original selected color
-  clearHighlight(id2color);
+  clearHighlight(id2color)
 
   if (selected === null || selected === undefined) {
     // Null means no highlight is necessary
-    return;
+    return
   }
 
-  let selectedCircle = "#c" + selected;
+  let selectedCircle = '#c' + selected
   if (selected instanceof Array) {
-    selectedCircle = selected.map((id) => "#c" + id).join(",");
+    selectedCircle = selected.map(id => '#c' + id).join(',')
   }
 
-  const highlight = d3Selection.selectAll(selectedCircle);
+  const highlight = d3Selection.selectAll(selectedCircle)
 
   if (!highlight) {
-    return;
+    return
   }
 
   highlight
-    .style("fill", (d) => id2color.get(d.data.id))
-    .style("display", "inline")
-    .attr("r", (d) => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d, 2)));
-  lastHighlight = highlight;
-};
+    .style('fill', d => id2color.get(d.data.id))
+    .style('display', 'inline')
+    .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d, 2)))
+  lastHighlight = highlight
+  console.log('---------------------HL Color:')
+}
 
 export const fit = () => {
-  currentDepth = MAX_DEPTH;
-  const trans = d3Zoom.zoomIdentity.translate(0, 0).scale(1);
-  svg.call(zoom2.transform, trans);
-  zoom(root);
-};
+  currentDepth = MAX_DEPTH
+  const trans = d3Zoom.zoomIdentity.translate(0, 0).scale(1)
+  svg.call(zoom2.transform, trans)
+  zoom(root)
+}
 
-export const changeDepth = (depth) => {
-  expandDepth = depth;
-  expand(root);
-  zoom(root);
+export const changeDepth = depth => {
+  expandDepth = depth
+  expand(root)
+  zoom(root)
   if (d3Selection.event !== undefined && d3Selection.event !== null) {
-    d3Selection.event.stopPropagation();
+    d3Selection.event.stopPropagation()
   }
-};
+}
 
 export const changeColor = (rootColor, leafColor) => {
-  initializeColorMaps(rootColor, leafColor);
-  expand(root);
-  zoom(root);
+  initializeColorMaps(rootColor, leafColor)
+  expand(root)
+  zoom(root)
+  console.log('---------------------C Color:')
   if (d3Selection.event !== undefined && d3Selection.event !== null) {
-    d3Selection.event.stopPropagation();
+    d3Selection.event.stopPropagation()
   }
-};
+}
 
 const restoreHighlight = () => {
   if (highlightMap === null || highlightMap === undefined) {
-    return;
+    return
   }
 
-  const selected = Array.from(highlightMap.keys());
+  const selected = Array.from(highlightMap.keys())
   const selectedCircles = selected
-    .map((id) => "#c" + id)
-    .reduce(
-      (previousValue, currentValue, index, array) =>
-        previousValue + ", " + currentValue
-    );
+    .map(id => '#c' + id)
+    .reduce((previousValue, currentValue, index, array) => previousValue + ', ' + currentValue)
 
-  const searchResultNodes = d3Selection.selectAll(selectedCircles);
+  const searchResultNodes = d3Selection.selectAll(selectedCircles)
   searchResultNodes
-    .style("fill", (d) => highlightMap.get(d.data.id))
-    .style("display", "inline")
-    .attr("r", (d) => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)));
-};
+    .style('fill', d => highlightMap.get(d.data.id))
+    .style('display', 'inline')
+    .attr('r', d => (trans.k > ZOOM_TH_1 ? d.r : calcRadius(d)))
+}
 
 /**
  * Clear extra circles and highlights
  */
 export const clear = () => {
   if (selectedGroups === null) {
-    return;
+    return
   }
   selectedGroups
     .data([])
     .exit()
-    .remove();
-  selectedGroups = null;
-  searchResults = [];
-  highlightMap = null;
-  changeDepth(1);
-};
+    .remove()
+  selectedGroups = null
+  searchResults = []
+  highlightMap = null
+  changeDepth(1)
+}
 
-export default CirclePacking;
+export default CirclePacking
