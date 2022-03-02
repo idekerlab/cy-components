@@ -26,7 +26,7 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    * @param properties - Optional:
    *   Object contains node properties. (Key is ID)
    */
-  selectNodes: (nodeIds, properties = {}) => {
+  selectNodes: (nodeIds, properties = {}, rawEvent) => {
     // console.log('selectNodes called.')
     // console.log(nodeIds)
   },
@@ -38,7 +38,7 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    * @param properties - Optional:
    *   Object contains edge properties. (Key is ID)
    */
-  selectEdges: (edgeIds, properties = {}) => {
+  selectEdges: (edgeIds, properties = {}, rawEvent) => {
     // console.log('selectEdges called.')
   },
 
@@ -201,7 +201,8 @@ const CyNetworkViewer = RendererComponent => {
     },
     eventHandlers: DEF_EVENT_HANDLERS.toJS(),
     rendererOptions: {
-      layout: 'preset' // For Cytoscape.js
+      layout: 'preset', // For Cytoscape.js,
+      tooltipKeys: [] // if [key1, key2, ...] are provided, those will be rendered in tooltip
     },
 
     setRendererReference: null

@@ -10,6 +10,9 @@ const CY_EVENTS = {
   add: 'add',
   remove: 'remove',
 
+  tap: 'tap',
+  click: 'click',
+  
   boxselect: 'boxselect',
   boxstart: 'boxstart'
 }
@@ -51,6 +54,7 @@ const DEF_VS = [
 
 
 // Events handled by this renderer
+// const SUPPORTED_EVENTS = 'click'
 const SUPPORTED_EVENTS = 'select unselect'
 // const SUPPORTED_EVENTS = 'data select unselect add remove boxselect boxstart'
 

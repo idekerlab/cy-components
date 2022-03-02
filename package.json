@@ -9,6 +9,6 @@
     "react-dom": "*"
   },
   "devDependencies": {
-    "lerna": "^3.16.4"
+    "lerna": "^4.0.0"
   }
 }
