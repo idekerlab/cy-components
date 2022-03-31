@@ -819,6 +819,7 @@ class CytoscapeJsRenderer extends Component {
 
     // TODO: this is only for Anton's use case.  Need to generalize this
     cy.on('select unselect click tap', 'node', this.cyEventHandler)
+    cy.on('select unselect click tap', 'edge', this.cyEventHandler)
 
     cy.on('tap', function(e) {
       if (e.target === cy) {
