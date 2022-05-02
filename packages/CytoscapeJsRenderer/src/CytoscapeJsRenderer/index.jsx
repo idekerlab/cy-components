@@ -590,7 +590,7 @@ class CytoscapeJsRenderer extends Component {
         if (newEdges.length !== 0) {
           const added = cy.add(newEdges)
           added.style({
-            width: 12,
+            width: 5,
             'line-opacity': 1,
             'z-index': 2000,
             'line-cap': 'round'
