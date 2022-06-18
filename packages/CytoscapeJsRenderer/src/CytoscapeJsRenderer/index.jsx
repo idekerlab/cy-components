@@ -593,7 +593,8 @@ class CytoscapeJsRenderer extends Component {
             width: 5,
             'line-style': 'dashed',
             'line-opacity': 1,
-            'z-index': 2000,
+            'z-index': 5000,
+            opacity: 1
             // 'line-cap': 'round'
           })
           // added.style('line-color', edgeColor)
