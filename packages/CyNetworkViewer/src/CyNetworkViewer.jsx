@@ -47,7 +47,7 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    *
    * @param nodeIds - Array of unselected node IDs
    */
-  deselectNodes: (nodeIds) => {
+  deselectNodes: (nodeIds, rawEvent) => {
     // console.log('deselectNodes called.')
   },
 
@@ -56,7 +56,7 @@ const DEF_EVENT_HANDLERS = Immutable.fromJS({
    *
    * @param edgeIds - Array of unselected edge IDs
    */
-  deselectEdges: (edgeIds) => {
+  deselectEdges: (edgeIds, rawEvent) => {
     console.log('deselectEdges called.')
   },
 

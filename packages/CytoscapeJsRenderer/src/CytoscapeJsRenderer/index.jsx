@@ -803,9 +803,9 @@ class CytoscapeJsRenderer extends Component {
         break
       case config.CY_EVENTS.unselect:
         if (target.isNode()) {
-          this.props.eventHandlers.deselectNodes([target.data().id])
+          this.props.eventHandlers.deselectNodes([target.data().id], event)
         } else {
-          this.props.eventHandlers.deselectEdges([target.data().id])
+          this.props.eventHandlers.deselectEdges([target.data().id], event)
         }
         break
 
