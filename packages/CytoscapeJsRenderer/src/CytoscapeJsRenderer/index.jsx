@@ -589,14 +589,14 @@ class CytoscapeJsRenderer extends Component {
         const newEdges = this.expandEdges(edgeType, cy.edges(), mainEdgeType, edgeColor)
         if (newEdges.length !== 0) {
           const added = cy.add(newEdges)
-          added.style({
-            width: 5,
-            'line-style': 'dashed',
-            'line-opacity': 1,
-            'z-index': 5000,
-            opacity: 1
-            // 'line-cap': 'round'
-          })
+          // added.style({
+          //   // width: 5,
+          //   'line-style': 'dashed',
+          //   'line-opacity': 1,
+          //   'z-index': 5000,
+          //   opacity: 1
+          //   // 'line-cap': 'round'
+          // })
           // added.style('line-color', edgeColor)
           added.on('mouseover', evt => {
             const edge = evt.target
@@ -653,7 +653,7 @@ class CytoscapeJsRenderer extends Component {
             target: edge.data('target'),
             interaction: edgeType,
             color: edgeColor,
-            zIndex: 0,
+            zIndex: 99999,
             subEdge: true,
             [primaryEdgeType]: edge.data(primaryEdgeType),
             [edgeType]: edge.data(edgeType),
