@@ -157,11 +157,11 @@ const getFontSize = d => {
   const width = radius * 2
 
   if(numWords === 1) {
-    return (width / textLength) * 1.2
+    return (width / textLength) * 1.3
   } else if(numWords < 4) {
     return (width / textLength) * 3
   } else {
-    return (width / textLength) * 4.5
+    return (width / textLength) * 5.5
   }
 }
 
@@ -269,15 +269,18 @@ const addLabels = (container, data, newFocus) => {
     filtered.push(selectedSubsystem)
   }
 
+  const WORD_SPLIT = /[\s-]/
   const getText = (d, lineNumber = 1) => {
     const label = d.data.data.Label
-    const words = label.split(' ')
+    const words = label.split(WORD_SPLIT)
     const numWords = words.length
+
+    // Special cases: for better layout
     if(numWords === 1) {
-      if(lineNumber === 1) {
-        return label
-      } else {
+      if(lineNumber === 1 || lineNumber === 3) {
         return ''
+      } else {
+        return label
       }
     }
 
@@ -290,15 +293,25 @@ const addLabels = (container, data, newFocus) => {
         return ''
       }
     }
+    
+    if(numWords === 3) {
+      if(lineNumber === 1) {
+        return words[0]
+      } else if (lineNumber === 2) {
+        return words[1]
+      } else {
+        return words[2]
+      }
+    }
 
     const targetWords = Math.floor(numWords/3)
     let text = ''
     if(lineNumber === 1) {
       text = words.slice(0, targetWords).join(' ')
     } else if(lineNumber === 2) {
-      text = words.slice(targetWords, targetWords*2).join(' ')
+      text = words.slice(targetWords, targetWords*2+1).join(' ')
     } else {
-      text = words.slice(targetWords*2, numWords).join(' ')
+      text = words.slice(targetWords*2+1, numWords).join(' ')
     }
     return text
   }
@@ -319,6 +332,7 @@ const addLabels = (container, data, newFocus) => {
     .attr('y', d => d.y - createSizeMap(d)/2)
     .text(d => getText(d, 1))
     .style('font-size', d => createSizeMap(d))
+    .style('font-weight', 700)
   
   currentLabels2.enter()
     .append('text')
@@ -327,9 +341,10 @@ const addLabels = (container, data, newFocus) => {
     .style('fill', d => getLabelColor(d))
     .style('text-anchor', 'middle')
     .attr('x', d => d.x)
-    .attr('y', d => d.y + createSizeMap(d)/2)
+    .attr('y', d => d.y + createSizeMap(d)* 0.46)
     .text(d => getText(d, 2))
     .style('font-size', d => createSizeMap(d))
+    .style('font-weight', 700)
 
     return currentLabels3.enter()
     .append('text')
@@ -338,9 +353,10 @@ const addLabels = (container, data, newFocus) => {
     .style('fill', d => getLabelColor(d))
     .style('text-anchor', 'middle')
     .attr('x', d => d.x)
-    .attr('y', d => d.y + createSizeMap(d)*1.5)
+    .attr('y', d => d.y + createSizeMap(d)*1.4)
     .text(d => getText(d, 3))
     .style('font-size', d => createSizeMap(d))
+    .style('font-weight', 700)
 
 }
 
