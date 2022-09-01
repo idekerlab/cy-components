@@ -150,16 +150,19 @@ const CirclePacking = (tree, svgTree, w, h, originalProps) => {
 
 const getFontSize = d => {
   const txt = d.data.data.Label
-  const textLen = txt.length
+  const textLength = txt.length
+  const words = txt.split(' ')
+  const numWords = words.length
+  const radius = d.r
+  const width = radius * 2
 
-  let size = 10
-  if (textLen <= 5) {
-    size = (d.r * 2) / textLen
+  if(numWords === 1) {
+    return (width / textLength) * 1.2
+  } else if(numWords < 4) {
+    return (width / textLength) * 3
   } else {
-    size = (d.r * 3) / textLen
+    return (width / textLength) * 4.5
   }
-
-  return size
 }
 
 const createSizeMap = d => {
@@ -266,9 +269,46 @@ const addLabels = (container, data, newFocus) => {
     filtered.push(selectedSubsystem)
   }
 
-  const currentLabels = container.selectAll('text').data(filtered)
+  const getText = (d, lineNumber = 1) => {
+    const label = d.data.data.Label
+    const words = label.split(' ')
+    const numWords = words.length
+    if(numWords === 1) {
+      if(lineNumber === 1) {
+        return label
+      } else {
+        return ''
+      }
+    }
 
-  return currentLabels
+    if(numWords === 2) {
+      if(lineNumber === 1) {
+        return words[0]
+      } else if (lineNumber === 2) {
+        return words[1]
+      } else {
+        return ''
+      }
+    }
+
+    const targetWords = Math.floor(numWords/3)
+    let text = ''
+    if(lineNumber === 1) {
+      text = words.slice(0, targetWords).join(' ')
+    } else if(lineNumber === 2) {
+      text = words.slice(targetWords, targetWords*2).join(' ')
+    } else {
+      text = words.slice(targetWords*2, numWords).join(' ')
+    }
+    return text
+  }
+
+  // Lines
+  const currentLabels = container.selectAll('text').data(filtered)
+  const currentLabels2 = container.selectAll('text').data(filtered)
+  const currentLabels3 = container.selectAll('text').data(filtered)
+  
+  currentLabels
     .enter()
     .append('text')
     .attr('id', d => 'l' + d.data.id)
@@ -276,9 +316,32 @@ const addLabels = (container, data, newFocus) => {
     .style('fill', d => getLabelColor(d))
     .style('text-anchor', 'middle')
     .attr('x', d => d.x)
-    .attr('y', d => d.y)
-    .text(d => d.data.data.Label)
+    .attr('y', d => d.y - createSizeMap(d)/2)
+    .text(d => getText(d, 1))
     .style('font-size', d => createSizeMap(d))
+  
+  currentLabels2.enter()
+    .append('text')
+    .attr('id', d => 'l2' + d.data.id)
+    .attr('class', 'label')
+    .style('fill', d => getLabelColor(d))
+    .style('text-anchor', 'middle')
+    .attr('x', d => d.x)
+    .attr('y', d => d.y + createSizeMap(d)/2)
+    .text(d => getText(d, 2))
+    .style('font-size', d => createSizeMap(d))
+
+    return currentLabels3.enter()
+    .append('text')
+    .attr('id', d => 'l3' + d.data.id)
+    .attr('class', 'label')
+    .style('fill', d => getLabelColor(d))
+    .style('text-anchor', 'middle')
+    .attr('x', d => d.x)
+    .attr('y', d => d.y + createSizeMap(d)*1.5)
+    .text(d => getText(d, 3))
+    .style('font-size', d => createSizeMap(d))
+
 }
 
 /**
