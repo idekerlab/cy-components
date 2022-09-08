@@ -10,6 +10,8 @@ regCose(cytoscape)
 // Extension for tooltip
 cytoscape.use(popper)
 
+
+const SUBTYPE_TAG = 'ndex:edgesubtype'
 /**
  * Renderer using Cytoscape.js
  */
@@ -635,6 +637,18 @@ class CytoscapeJsRenderer extends Component {
     this.state.cyjs.on(config.SUPPORTED_EVENTS, this.cyEventHandler)
   }
 
+
+  getNewColor = (e) => {
+    const subtype = e.data(SUBTYPE_TAG)
+    if ( subtype === 'ctrl') {
+      return '#66A61E'
+    } else if(subtype === 'trtd'){
+      return '#E7298A'
+    } else {
+      return '#FFFFFF'
+    }
+
+  }
   /*
     Using data type to add more edges to the primary one
    */
@@ -646,13 +660,16 @@ class CytoscapeJsRenderer extends Component {
       const edge = edges[i]
       const value = edge.data(edgeType)
       if (value) {
+
+
         const newEdge = {
           data: {
+            subtype: edge.data(SUBTYPE_TAG),
             id: edge.data('id') + '-' + edgeType,
             source: edge.data('source'),
             target: edge.data('target'),
             interaction: edgeType,
-            color: edgeColor,
+            color: this.getNewColor(edge),
             zIndex: 99999,
             subEdge: true,
             [primaryEdgeType]: edge.data(primaryEdgeType),
