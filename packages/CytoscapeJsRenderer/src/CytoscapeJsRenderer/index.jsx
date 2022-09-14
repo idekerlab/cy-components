@@ -93,7 +93,6 @@ class CytoscapeJsRenderer extends Component {
       this.setPrimaryEdgeStatus(this.props.hidePrimary)
       this.setEventListener(cy)
       this.setState({ rendered: true })
-      console.log('### CYJS INIT2', cy)
     }, 12)
   }
 
